@@ -1,0 +1,16 @@
+ 
+namespace {projectNamespace}.WebApi.Extensions
+{
+
+    public static class ServicesAndRepositoriesExtensions
+    {
+        public static IServiceCollection AddRegisterServicesAndRepositories(this IServiceCollection services,
+          IConfiguration config)
+        {
+            {RegisterDataRepositories}
+            {RegisterDataServices}
+
+            return services;
+        }
+    }
+}

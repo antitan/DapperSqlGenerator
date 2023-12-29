@@ -1,0 +1,38 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace {projectNamespace}.Common.Helpers
+{
+    public static class JsonHelper
+    {
+        public static string ExtractJsonObject(string input)
+        {
+            return StringHelpers.ExtractSubstringBetweenChars(input, '{', '}');
+        }
+
+        public static IList<T> ExtractJsonList<T>(string input)
+        {
+            var jsonArr = StringHelpers.ExtractSubstringBetweenChars(input, '[', ']');
+            return JsonSerializer.Deserialize<List<T>>(jsonArr);
+        }
+
+        public static IList<T> ExtractJsonList<T>(string input, JsonSerializerOptions options)
+        {
+            var jsonArr = StringHelpers.ExtractSubstringBetweenChars(input, '[', ']');
+            return JsonSerializer.Deserialize<List<T>>(jsonArr, options);
+        }
+
+        public static JsonSerializerOptions ConfigureDefaultSerialization()
+        {
+            var jsonSerializerOptions = new JsonSerializerOptions();
+            // Default to case insensitive property name matching as that's likely the behavior most users expect
+            jsonSerializerOptions.PropertyNameCaseInsensitive = true;
+            jsonSerializerOptions.WriteIndented = true;
+            jsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            jsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            jsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            return jsonSerializerOptions;
+
+        }
+    }
+}

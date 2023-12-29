@@ -1,0 +1,66 @@
+﻿using DapperSqlGenerator.Console.Extenions;
+using DapperSqlGenerator.Console.Helpers;
+using Microsoft.SqlServer.Dac.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace DapperSqlGenerator.Console.Generator.Entities
+{
+    public class EntityClassGenerator : IGenerate
+    {
+        TSqlObject table;
+        string projectNamespace;
+        public EntityClassGenerator(string projectNamespace, TSqlObject table)
+        {
+            this.table = table;
+            this.projectNamespace = projectNamespace;
+        }
+
+        public string Generate()
+        {
+            var allColumns = table.GetAllColumns();
+            var pkColumns = table.GetPrimaryKeyColumns();
+
+            var memberDeclarations = string.Join(Environment.NewLine + "        ", allColumns.Select(col =>
+            {
+                var colName = col.Name.Parts[2];
+                var memberName = colName.PascalCase();
+                var colDataType = col.GetColumnSqlDataType(false);
+                var isNullable = col.IsColumnNullable();
+                bool isPk = pkColumns.SingleOrDefault(c => c.Name.Parts[2] == colName) != null ? true : false;
+
+                var memberType = MatchingDataTypeHelper.GetDotNetDataType(colDataType, isNullable);
+
+                //Decorators
+                var decorators = string.Empty;
+
+
+                if (memberType == "string")
+                {
+                    var colLen = col.GetProperty<int>(Column.Length);
+                    if (colLen > 0)
+                    {
+                        decorators += $"[System.ComponentModel.DataAnnotations.StringLength({colLen})]" + Environment.NewLine + "        ";
+                    }
+                }
+
+                return $"{decorators}public {memberType} {memberName} {{ get; set; }}" + Environment.NewLine;
+            }));
+
+            string output = $@"using System;" + Environment.NewLine +
+                            $"namespace {projectNamespace}" + Environment.NewLine +
+                            "{" + Environment.NewLine +
+                            $"  public class {table.Name.Parts[1]}" + Environment.NewLine +
+                            "   { " + Environment.NewLine +
+                            $"      {memberDeclarations}" + Environment.NewLine +
+                            "   }" + Environment.NewLine +
+                            "}" + Environment.NewLine;
+
+            return output;
+        }
+
+    }
+}

@@ -1,0 +1,7 @@
+namespace {projectNamespace}.Common.Constants
+{
+    public static class CacheDataConstants
+    {
+       {CacheDataKeys}
+    }
+}

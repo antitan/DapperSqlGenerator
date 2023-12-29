@@ -1,0 +1,124 @@
+using Microsoft.Extensions.Caching.Memory;
+using SmartCv.Common.Constants;
+using System.Collections.Concurrent;
+
+namespace {projectNamespace}.Common.Cache
+{
+    public partial class MemoryCacheManager : ICacheManager 
+    {
+        #region Fields
+
+        private readonly IMemoryCache _memoryCache;
+        private readonly ConcurrentBag<string> _keys;
+        // Flag: Has Dispose already been called?
+        private bool _disposed;
+        #endregion
+
+        #region Ctor
+
+        public MemoryCacheManager(IMemoryCache memoryCache)
+        {
+            _memoryCache = memoryCache;
+            _keys = new ConcurrentBag<string>();    
+        }
+
+        #endregion
+
+        #region Methods
+
+
+        public T Get<T>(string key)
+        {
+            return _memoryCache.TryGetValue(key, out T value) ? value : default;
+        }
+
+
+
+        public async Task<T> GetAsync<T>(string key)
+        {
+            return await Task.FromResult(Get<T>(key));
+        }
+
+        public void Add<T>(string key, T value, int? cacheTime=null)
+        {
+            if (!_keys.Contains(key))
+            {
+                _keys.Add(key);
+            }
+            _memoryCache.Set(key, value, new MemoryCacheEntryOptions()
+            {
+                SlidingExpiration = TimeSpan.FromHours((cacheTime.HasValue) ? cacheTime.Value : CacheConstants.DefaultCacheTime)
+            });
+        }
+
+
+        /// <summary>
+        /// Gets a value indicating whether the value associated with the specified key is cached
+        /// </summary>
+        /// <param name="key">Key of cached item</param>
+        /// <returns>True if item already is in cache; otherwise false</returns>
+        public bool IsSet(string key)
+        {
+            return _memoryCache.TryGetValue(key, out _);
+        }
+
+       
+
+        /// <summary>
+        /// Removes the value with the specified key from the cache
+        /// </summary>
+        /// <param name="key">Key of cached item</param>
+        public void RemoveKey(string key)
+        {
+            if(IsSet(key))
+            _memoryCache.Remove(key);
+            // Vous pourriez aussi vouloir enlever la clé du ConcurrentBag
+            string removedKey = _keys.FirstOrDefault(k => k == key);
+            if (removedKey != null)
+            {
+                _keys.TryTake(out removedKey);
+            }
+        }
+
+        /// <summary>
+        /// Removes items by key prefix
+        /// </summary>
+        /// <param name="prefix">String key prefix</param>
+        public void RemoveByPrefix(string prefix)
+        {
+            var keysToRemove = _keys.Where(k => k.StartsWith(prefix)).ToList();
+            foreach (var key in keysToRemove)
+            {
+                _memoryCache.Remove(key);
+                _keys.TryTake(out string _); // Remove the key from the bag as well
+            }
+        }
+
+        /// <summary>
+        /// Dispose cache manager
+        /// </summary>
+        public virtual void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        // Protected implementation of Dispose pattern.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+
+            if (disposing)
+            {
+                _memoryCache.Dispose();
+            }
+
+            _disposed = true;
+        }
+
+        #endregion
+
+
+    }
+}
