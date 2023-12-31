@@ -142,14 +142,6 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
                 })
             );
 
-            var pkFieldNames = String.Join("And",
-                pkColumns.Select(col =>
-                {
-                    var colName = col.Name.Parts[2];
-                    return $"{colName.PascalCase()}";
-                })
-            );
-
             query = BuildSelectTableFileds(whereClause_conditions);
             return query;
         }

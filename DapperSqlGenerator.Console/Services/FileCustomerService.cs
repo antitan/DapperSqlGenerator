@@ -13,12 +13,14 @@ namespace DapperSqlGenerator.Console.Services
 
         string projectName;
         string[] excludedTables;
+        string[] refTables;
         string registerServiceExtensionDir;
         string constantsDir;
-        public FileCustomerService(string projectName,  string registerServiceExtensionDir, string constantsDir,string[] excludedTables)
+        public FileCustomerService(string projectName,  string registerServiceExtensionDir, string constantsDir,string[] excludedTables, string[] refTables)
         {
             this.projectName = projectName;
             this.excludedTables = excludedTables;
+            this.refTables = refTables; 
             this.constantsDir = constantsDir;   
             this.registerServiceExtensionDir=registerServiceExtensionDir;   
         }
@@ -30,15 +32,13 @@ namespace DapperSqlGenerator.Console.Services
             string path = Path.Combine(registerServiceExtensionDir, Path.GetFileNameWithoutExtension(file) + ".cs");
             var serviceExtension = new ExtensionRegisterReposAndServices(path, contentFile, excludedTables, projectName);
             await serviceExtension.GenerateFilesAsync(model);
-            await File.WriteAllTextAsync(path, contentFile);
 
             //2- constants 
             file = "./FilesToCopy/Constants/CacheDataConstants.txt";
             contentFile = File.ReadAllText(file);
             path = Path.Combine(constantsDir, Path.GetFileNameWithoutExtension(file) + ".cs");
-            var service = new CacheDataConstantsService(path, contentFile, excludedTables, projectName);
+            var service = new CacheDataConstantsService(path, contentFile, excludedTables,  refTables, projectName);
             await service.GenerateFilesAsync(model);
-            await File.WriteAllTextAsync(path, contentFile);
         }
     }
 }

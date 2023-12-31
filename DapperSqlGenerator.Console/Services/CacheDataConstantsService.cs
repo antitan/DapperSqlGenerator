@@ -13,12 +13,14 @@ namespace DapperSqlGenerator.Console.Services
     {
         string filePathToWrite;
         string[] excludedTables;
+        string[] refTables;
         string projectName;
         string contentFile;
-        public CacheDataConstantsService(string filePathToWrite, string contentFile, string[] excludedTables, string projectName)
+        public CacheDataConstantsService(string filePathToWrite, string contentFile, string[] excludedTables, string[] refTables, string projectName)
         {
             this.filePathToWrite = filePathToWrite;
             this.excludedTables = excludedTables;
+            this.refTables = refTables;
             this.projectName = projectName;
             this.contentFile = contentFile;
         }
@@ -30,7 +32,7 @@ namespace DapperSqlGenerator.Console.Services
             foreach (var table in model.GetAllTables())
             {
                 var entityName = table.Name.Parts[1].PascalCase();
-                if (!excludedTables.Contains(entityName))
+                if (!excludedTables.Contains(entityName) && refTables.Contains(entityName))
                 {
                     listCacheDataKeys.Add($"public static string {entityName}AllCacheKey = \"{entityName}.all\";"); 
                 }

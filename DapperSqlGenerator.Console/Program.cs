@@ -21,15 +21,15 @@ namespace DapperSqlGenerator.Console
             if (!Directory.Exists(dataRepositoryDir)) Directory.CreateDirectory(dataRepositoryDir);
             string dataServiceDir = @"C:\Temp\Services";
             if (!Directory.Exists(dataServiceDir)) Directory.CreateDirectory(dataServiceDir);
-            string cacheServiceDir = @"C:\\Temp\\Cache";
+            string cacheServiceDir = @"C:\Temp\Cache";
             if (!Directory.Exists(cacheServiceDir)) Directory.CreateDirectory(cacheServiceDir);
-            string configurationDir = @"C:\\Temp\\Configuration";
+            string configurationDir = @"C:\Temp\Configuration";
             if (!Directory.Exists(configurationDir)) Directory.CreateDirectory(configurationDir);
-            string registerServiceExtensionDir = @"C:\\Temp\\Extensions";
+            string registerServiceExtensionDir = @"C:\Temp\Extensions";
             if (!Directory.Exists(registerServiceExtensionDir)) Directory.CreateDirectory(registerServiceExtensionDir);
-            string helpersDir = @"C:\\Temp\\Helpers";
+            string helpersDir = @"C:\Temp\Helpers";
             if (!Directory.Exists(helpersDir)) Directory.CreateDirectory(helpersDir);
-            string constantsDir = @"C:\\Temp\\Constants";
+            string constantsDir = @"C:\Temp\Constants";
             if (!Directory.Exists(constantsDir)) Directory.CreateDirectory(constantsDir);
 
             //excludes table we don't want ot generate
@@ -50,22 +50,21 @@ namespace DapperSqlGenerator.Console
             generatorServices.Add( new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, excludedTables));
             generatorServices.Add(new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataServiceDir,projectName, excludedTables, refTables));
             generatorServices.Add(new CopyUtilitiesFilesService(projectName,cacheServiceDir,configurationDir,helpersDir));
-            generatorServices.Add(new FileCustomerService(projectName,registerServiceExtensionDir,constantsDir, excludedTables));
+            generatorServices.Add(new FileCustomerService(projectName,registerServiceExtensionDir,constantsDir, excludedTables, refTables));
 
-            await new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables).GenerateFilesAsync(model);
-            await new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, excludedTables).GenerateFilesAsync(model);
-            await new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataServiceDir, projectName, excludedTables, refTables).GenerateFilesAsync(model);
-            await new CopyUtilitiesFilesService(projectName, cacheServiceDir, configurationDir, helpersDir).GenerateFilesAsync(model);
-            await new FileCustomerService(projectName, registerServiceExtensionDir, constantsDir, excludedTables).GenerateFilesAsync(model);
+            //await new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables).GenerateFilesAsync(model);
+            //await new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, excludedTables).GenerateFilesAsync(model);
+            //await new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataServiceDir, projectName, excludedTables, refTables).GenerateFilesAsync(model);
+            //await new CopyUtilitiesFilesService(projectName, cacheServiceDir, configurationDir, helpersDir).GenerateFilesAsync(model);
+            //await new FileCustomerService(projectName, registerServiceExtensionDir, constantsDir, excludedTables, refTables).GenerateFilesAsync(model);
 
-            List<Task> tasks = new List<Task>();
+            //List<Task> tasks = new List<Task>();
+            //generatorServices.ForEach(serv =>
+            //{
+            //    tasks.Add(Task.Run(() => serv.GenerateFilesAsync(model)));
+            //});
+            //await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            generatorServices.ForEach(serv =>
-            {
-                tasks.Add(Task.Run(() => serv.GenerateFilesAsync(model)));
-            });
-            await Task.WhenAll(tasks);
-             
 
             //TODO read StoredProcedure
         }

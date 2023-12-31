@@ -24,6 +24,20 @@ namespace DapperSqlGenerator.Console.Generator
         }
 
         /// <summary>
+        /// Concat all the actual pk fields names in a string with "&&" as a separator
+        /// </summary>
+        /// <returns></returns>
+        public static string ConcatPkFieldNamesForLinq(TSqlObject table)
+        {
+            var pkColumns = table.GetPrimaryKeyColumns();
+            return String.Join(" && ", pkColumns.Select(col =>
+            {
+                var colName = col.Name.Parts[2];
+                return $"f.{colName} == {colName}";
+            }));
+        }
+
+        /// <summary>
         /// Concat all the actual pk fields names in a string with "And" as a separator
         /// </summary>
         /// <returns></returns>

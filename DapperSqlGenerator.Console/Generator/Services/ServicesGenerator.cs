@@ -92,13 +92,15 @@ namespace DapperSqlGenerator.Console.Generator.Services
             yield return GenerateUpdateDelegate(entityClassName);
             yield return GenerateDeleteDelegate(entityClassName);
             yield return (isRefTable)? GenerateGetAllDelegateRef(entityClassName) : GenerateGetAllDelegate(entityClassName);
-            yield return (isRefTable) ? GenerateGetAllGetByPkDelegateRef(entityClassName) : GenerateGetAllGetByPkDelegate(entityClassName);
+            yield return (isRefTable)? GenerateGetByPkDelegateRef(entityClassName) : GenerateGetByPkDelegate(entityClassName);
         }
 
-        private string GenerateGetAllGetByPkDelegate(string entityClassName)
+        private string GenerateGetByPkDelegate(string entityClassName)
         {  
             var pkFieldsNames = Common.ConcatPkFieldNames(table);
-            var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table); 
+            var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table);
+            var pkColumns = table.GetPrimaryKeyColumns();
+            var columnListStr = string.Join(',', pkColumns);
 
             string output = $@"
                 /// <summary>
@@ -106,18 +108,25 @@ namespace DapperSqlGenerator.Console.Generator.Services
                 /// </summary>
                 public async Task<{entityClassName}> GetBy{pkFieldsNames}({pkFieldsWithTypes})
                 {{
-                    using (var connection = new SqlConnection(connectionString))
+                    try
                     {{
-                        await return {entityClassName.ToLower()}.GetBy{pkFieldsNames}({pkFieldsWithTypes});
+                          return  await return {entityClassName.ToLower()}.GetBy{pkFieldsNames}({columnListStr});
                     }}
+                    catch(Exception ex)
+                    {{
+                        logger.LogError($"" Problem to GetBy{pkFieldsNames} {entityClassName}  error : {{ex}}"");
+                    }} 
+
                 }}" + Environment.NewLine;
 
             return output;
         }
-        private string GenerateGetAllGetByPkDelegateRef(string entityClassName)
+        private string GenerateGetByPkDelegateRef(string entityClassName)
         { 
             var pkFieldsNames = Common.ConcatPkFieldNames(table);
             var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table);
+            var pkColumns = table.GetPrimaryKeyColumns();
+            var columnListStr = string.Join(',', pkColumns);
 
             string output = $@"
                 /// <summary>
@@ -125,10 +134,17 @@ namespace DapperSqlGenerator.Console.Generator.Services
                 /// </summary>
                 public async Task<{entityClassName}> GetBy{pkFieldsNames}({pkFieldsWithTypes})
                 {{
-                    using (var connection = new SqlConnection(connectionString))
+                    {entityClassName} obj = null;
+                    try
                     {{
-                        await return {entityClassName.ToLower()}.GetBy{pkFieldsNames}({pkFieldsNames});
+                         obj = (await GetAll()).FirstOrDefault(f=> {Common.ConcatPkFieldNamesForLinq(table)}); 
                     }}
+                    catch(Exception ex)
+                    {{
+                        logger.LogError($"" Problem to GetBy{pkFieldsNames} {entityClassName}  error : {{ex}}"");
+                    }} 
+                    return obj;
+                    
                 }}" + Environment.NewLine;
 
             return output;
@@ -140,9 +156,16 @@ namespace DapperSqlGenerator.Console.Generator.Services
                  /// <summary>
                  /// Get all {entityClassName}
                  /// </summary>
-                 public async Task<IEnumerable<{entityClassName}>> GetAll()
+                 public async Task<IEnumerable<{entityClassName}>> GetAll();
                  {{
-                     return await {entityClassName.ToLower()}GetAll();
+                    try
+                    {{
+                         return await {entityClassName.ToLower()}Repository.GetAll();
+                    }}
+                    catch(Exception ex)
+                    {{
+                        logger.LogError($"" Problem to get all {entityClassName}  error : {{ex}}"");
+                    }}
                  }}";
 
             return output;
@@ -154,8 +177,23 @@ namespace DapperSqlGenerator.Console.Generator.Services
                  /// Get all {entityClassName}
                  /// </summary>
                  public async Task<IEnumerable<{entityClassName}>> GetAll()
-                 {{
-                     return await {entityClassName.ToLower()}.GetAll();
+                 {{ 
+                      IEnumerable<{entityClassName}> result = null;
+                      try
+                      {{
+                         if (!cacheManager.IsSet(CacheDataConstants.{entityClassName}AllCacheKey))
+                         {{
+                             res = await {entityClassName.ToLower()}Repository.GetAll();
+                             cacheManager.Add(CacheDataConstants.{entityClassName}AllCacheKey, result);
+                         }}
+                         else 
+                            return cacheManager.Get<IEnumerable<{entityClassName}>>(CacheDataConstants.{entityClassName}AllCacheKey);
+                     }}
+                    catch (Exception ex)
+                    {{
+                        logger.LogError($"" Problem to get all {entityClassName}  error : {{ex}}"");
+                    }}
+                    return result;
                  }}";
 
             return output;

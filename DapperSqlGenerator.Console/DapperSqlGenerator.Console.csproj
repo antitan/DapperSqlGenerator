@@ -23,6 +23,9 @@
     <None Update="FilesToCopy\Configuration\ConnectionStrings.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="FilesToCopy\Constants\CacheDataConstants.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="FilesToCopy\Helpers\JsonHelper.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
