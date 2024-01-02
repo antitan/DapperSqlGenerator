@@ -1,14 +1,6 @@
 ﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Generator.Repositories;
 using DapperSqlGenerator.Console.Helpers;
 using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace DapperSqlGenerator.Console.Generator.Services
 {
@@ -36,6 +28,7 @@ namespace DapperSqlGenerator.Console.Generator.Services
             return  "using Microsoft.Extensions.Logging;" + Environment.NewLine +
                     $"using Dapper;" + Environment.NewLine +
                     $"using System.Text.Json;" + Environment.NewLine +
+                    $"using System.Linq.Expressions;" + Environment.NewLine +
                     $"using {projectName}.Common.Helpers;" + Environment.NewLine +
                     $"using {projectName}.Common.Constants;" + Environment.NewLine +
                     $"using {projectName}.Common.Cache;" + Environment.NewLine +
@@ -67,9 +60,9 @@ namespace DapperSqlGenerator.Console.Generator.Services
                 {{
                     private readonly I{entityClassName}Repository {Common.FirstCharacterToLower(entityClassName)}Repository;
                     private readonly ICacheManager cacheManager;
-                    private readonly ILogger<{entityClassName}> logger;
+                    private readonly ILogger<{repoClassName}> logger;
 
-                    public {repoClassName}(I{entityClassName}Repository {Common.FirstCharacterToLower(entityClassName)}Repository, ICacheManager cacheManager,ILogger<{entityClassName}> logger )
+                    public {repoClassName}(I{entityClassName}Repository {Common.FirstCharacterToLower(entityClassName)}Repository, ICacheManager cacheManager,ILogger<{repoClassName}> logger )
                     {{
                          this.{Common.FirstCharacterToLower(entityClassName)}Repository = {Common.FirstCharacterToLower(entityClassName)}Repository;
                          this.cacheManager = cacheManager;
@@ -96,8 +89,58 @@ namespace DapperSqlGenerator.Console.Generator.Services
             yield return GenerateInsertDelegate(entityClassName);
             yield return GenerateUpdateDelegate(entityClassName);
             yield return GenerateDeleteDelegate(entityClassName);
-            if (isRefTable) yield return GenerateGetAllRefDelegate(entityClassName); 
-            yield return (isRefTable)? GenerateGetByRefPkDelegate(entityClassName) : GenerateGetByPkDelegate(entityClassName);
+            if (isRefTable) yield return GenerateGetAllRefDelegate(entityClassName);
+            yield return GenerateGetByPkDelegate(entityClassName);
+            yield return GenerateGetByExpressionDelegate(entityClassName);
+            yield return GenerateDeleteByExpressionDelegate(entityClassName);
+        }
+
+        private string GenerateDeleteByExpressionDelegate(string entityClassName)
+        {
+            var pkFieldsNames = Common.ConcatPkFieldNames(table);
+
+            string output = $@"
+                /// <summary>
+                /// Delete {entityClassName} by Expression
+                /// </summary>
+                public async Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
+                {{
+                    try
+                    {{
+                        await {Common.FirstCharacterToLower(entityClassName)}Repository.DeleteByExpressionAsync(criteria);
+                    }}
+                    catch(Exception ex)
+                    {{
+                        logger.LogError($"" Problem to DeleteByExpressionAsync for {entityClassName} Criter=[criteria.ToString() - criteria.ToMSSqlString()]   error : {{ex}}"");
+                    }}  
+                }}" + Environment.NewLine;
+
+            return output;
+        }
+
+        private string GenerateGetByExpressionDelegate(string entityClassName)
+        {
+            var pkFieldsNames = Common.ConcatPkFieldNames(table);
+
+            string output = $@"
+                /// <summary>
+                /// Get {entityClassName} by Expression
+                /// </summary>
+                public async Task<IEnumerable<{entityClassName}>> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
+                {{
+                    IEnumerable<{entityClassName}> result=null;
+                    try
+                    {{
+                        result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetByExpressionAsync(criteria);
+                    }}
+                    catch(Exception ex)
+                    {{
+                        logger.LogError($"" Problem to GetByExpressionAsync for {entityClassName} Criter=[criteria.ToString() - criteria.ToMSSqlString()] error : {{ex}}"");
+                    }}  
+                    return result;
+                }}" + Environment.NewLine;
+
+            return output;
         }
 
         private string GenerateGetByPkDelegate(string entityClassName)
@@ -110,12 +153,12 @@ namespace DapperSqlGenerator.Console.Generator.Services
                 /// <summary>
                 /// Get {entityClassName} by PK
                 /// </summary>
-                public async Task<{entityClassName}> GetBy{pkFieldsNames}({pkFieldsWithTypes})
+                public async Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
                 {{
                     {entityClassName} result = null;
                     try
                     {{
-                        result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetBy{pkFieldsNames}({pkFieldsWithComma});
+                        result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetBy{pkFieldsNames}Async({pkFieldsWithComma});
                     }}
                     catch(Exception ex)
                     {{
@@ -135,16 +178,16 @@ namespace DapperSqlGenerator.Console.Generator.Services
                 /// <summary>
                 /// Get {entityClassName} by PK
                 /// </summary>
-                public async Task<{entityClassName}> GetBy{pkFieldsNames}({pkFieldsWithTypes})
+                public async Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
                 {{
                     {entityClassName} result = null;
                     try
                     {{
-                         result = (await GetAll()).FirstOrDefault(f=> {Common.ConcatPkFieldNamesForLinq(table)}); 
+                         result = (await GetAllAsync()).FirstOrDefault(f=> {Common.ConcatPkFieldNamesForLinq(table)}); 
                     }}
                     catch(Exception ex)
                     {{
-                        logger.LogError($"" Problem to GetBy{pkFieldsNames} {entityClassName}  error : {{ex}}"");
+                        logger.LogError($"" Problem to GetBy{pkFieldsNames}  {entityClassName}  error : {{ex}}"");
                     }} 
                     return result;
                     
@@ -159,14 +202,14 @@ namespace DapperSqlGenerator.Console.Generator.Services
                  /// <summary>
                  /// Get all {entityClassName}
                  /// </summary>
-                 public async Task<IEnumerable<{entityClassName}>> GetAll()
+                 public async Task<IEnumerable<{entityClassName}>> GetAllAsync()
                  {{ 
                       IEnumerable<{entityClassName}> result = null;
                       try
                       {{
                          if (!cacheManager.IsSet(CacheDataConstants.{entityClassName}AllCacheKey))
                          {{
-                             result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetAll();
+                             result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetAllAsync();
                              cacheManager.Add(CacheDataConstants.{entityClassName}AllCacheKey, result);
                          }}
                          else 
@@ -197,12 +240,12 @@ namespace DapperSqlGenerator.Console.Generator.Services
             /// <summary>
             /// Insert {entityClassName}
             /// </summary>
-            public async  Task<{returnType}> Insert({entityClassName} {paramName})
+            public async  Task<{returnType}> InsertAsync({entityClassName} {paramName})
             {{
-                {returnType} result;
+                {returnType} result = ({returnType})ReflexionHelper.GetDefaultValue(typeof({returnType}));
                 try
                 {{
-                    result = await {Common.FirstCharacterToLower(entityClassName)}Repository.Insert({paramName}); 
+                    result = await {Common.FirstCharacterToLower(entityClassName)}Repository.InsertAsync({paramName}); 
                 }}
                 catch(Exception ex)
                 {{
@@ -219,11 +262,11 @@ namespace DapperSqlGenerator.Console.Generator.Services
             /// <summary>
             /// Update {entityClassName}
             /// </summary>
-            public async Task Update({entityClassName} {paramName})
+            public async Task UpdateAsync({entityClassName} {paramName})
             {{
                 try
                 {{
-                   await {Common.FirstCharacterToLower(entityClassName)}Repository.Update({paramName});  
+                   await {Common.FirstCharacterToLower(entityClassName)}Repository.UpdateAsync({paramName});  
                 }}
                 catch(Exception ex)
                 {{
@@ -243,11 +286,11 @@ namespace DapperSqlGenerator.Console.Generator.Services
                         /// <summary>
                         /// Delete {entityClassName}
                         /// </summary>
-                        public async Task DeleteBy{pkFieldsNames}({pkFieldsWithTypes})
+                        public async Task DeleteBy{pkFieldsNames}Async({pkFieldsWithTypes})
                         {{
                             try
                             {{
-                                 await {Common.FirstCharacterToLower(entityClassName)}Repository.DeleteBy{pkFieldsNames}({pkFieldsWithComma});
+                                 await {Common.FirstCharacterToLower(entityClassName)}Repository.DeleteBy{pkFieldsNames}Async({pkFieldsWithComma});
                             }}
                             catch(Exception ex)
                             {{
@@ -301,19 +344,25 @@ namespace DapperSqlGenerator.Console.Generator.Services
             bool isRefTable = refTables.Contains(entityClassName);
             //Get all
             if(isRefTable)
-                yield return $"Task<IEnumerable<{entityClassName}>> GetAll();";
+                yield return $"Task<IEnumerable<{entityClassName}>> GetAllAsync();";
 
             //Get by Primary key
-            yield return $"Task<{entityClassName}> GetBy{pkFieldsNames}({pkFieldsWithTypes});";
+            yield return $"Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";
+
+            //Get by Expression
+            yield return $"Task<IEnumerable<{entityClassName}>> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);";
 
             //Insert
-            yield return $"Task<{returnType}> Insert({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
+            yield return $"Task<{returnType}> InsertAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
 
             //Update
-            yield return $"Task Update({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
+            yield return $"Task UpdateAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
 
             //Delete
-            yield return $"Task DeleteBy{pkFieldsNames}({pkFieldsWithTypes});"; 
+            yield return $"Task DeleteBy{pkFieldsNames}Async({pkFieldsWithTypes});";
+
+            //DeleteAsync
+            yield return $"Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);";
 
         }
     }

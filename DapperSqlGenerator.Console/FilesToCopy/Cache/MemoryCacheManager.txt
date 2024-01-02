@@ -1,5 +1,4 @@
-using Microsoft.Extensions.Caching.Memory;
-using SmartCv.Common.Constants;
+using Microsoft.Extensions.Caching.Memory; 
 using System.Collections.Concurrent;
 
 namespace {projectNamespace}.Common.Cache
@@ -39,7 +38,7 @@ namespace {projectNamespace}.Common.Cache
             return await Task.FromResult(Get<T>(key));
         }
 
-        public void Add<T>(string key, T value, int? cacheTime=null)
+         public void Add<T>(string key, T value, int? cacheTime = 3)
         {
             if (!_keys.Contains(key))
             {
@@ -47,7 +46,7 @@ namespace {projectNamespace}.Common.Cache
             }
             _memoryCache.Set(key, value, new MemoryCacheEntryOptions()
             {
-                SlidingExpiration = TimeSpan.FromHours((cacheTime.HasValue) ? cacheTime.Value : CacheConstants.DefaultCacheTime)
+                SlidingExpiration = TimeSpan.FromHours(cacheTime.Value)
             });
         }
 

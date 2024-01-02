@@ -1,0 +1,85 @@
+using System.Linq.Expressions;
+using System.Linq;
+
+namespace {projectNamespace}.Common.Helpers
+{
+    public static class ExpressionExtensions
+    {
+        public static string ToMSSqlString(this Expression expression)
+        {
+            switch (expression.NodeType)
+            {
+                case ExpressionType.Add:
+                    var add = (BinaryExpression)expression;
+                    return add.Left.ToMSSqlString() + " + " + add.Right.ToMSSqlString();
+
+                case ExpressionType.Constant:
+                    var constant = (ConstantExpression)expression;
+                    if (constant.Type == typeof(string))
+                        return "N'" + constant.Value.ToString().Replace("'", "''") + "'";
+                    return constant.Value.ToString();
+
+                case ExpressionType.Equal:
+                    var equal = (BinaryExpression)expression;
+                    return equal.Left.ToMSSqlString() + " = " + equal.Right.ToMSSqlString();
+
+                case ExpressionType.Lambda:
+                    var lambda = (LambdaExpression)expression;
+                    return lambda.Body.ToMSSqlString();
+
+                case ExpressionType.MemberAccess:
+                    var memberAccess = (MemberExpression)expression;
+                    return "[" + memberAccess.Member.Name + "]";
+
+                case ExpressionType.OrElse:
+                    var or = (BinaryExpression)expression;
+                    return "(" + or.Left.ToMSSqlString() + " OR " + or.Right.ToMSSqlString() + ")";
+
+                case ExpressionType.AndAlso:
+                    var and = (BinaryExpression)expression;
+                    return "(" + and.Left.ToMSSqlString() + " AND " + and.Right.ToMSSqlString() + ")";
+
+                case ExpressionType.NotEqual:
+                    var notEqual = (BinaryExpression)expression;
+                    return notEqual.Left.ToMSSqlString() + " <> " + notEqual.Right.ToMSSqlString();
+
+                case ExpressionType.GreaterThan:
+                    var greaterThan = (BinaryExpression)expression;
+                    return greaterThan.Left.ToMSSqlString() + " > " + greaterThan.Right.ToMSSqlString();
+
+                case ExpressionType.LessThan:
+                    var lessThan = (BinaryExpression)expression;
+                    return lessThan.Left.ToMSSqlString() + " < " + lessThan.Right.ToMSSqlString();
+
+                case ExpressionType.Subtract:
+                    var subtract = (BinaryExpression)expression;
+                    return subtract.Left.ToMSSqlString() + " - " + subtract.Right.ToMSSqlString();
+
+                case ExpressionType.Multiply:
+                    var multiply = (BinaryExpression)expression;
+                    return multiply.Left.ToMSSqlString() + " * " + multiply.Right.ToMSSqlString();
+
+                case ExpressionType.Divide:
+                    var divide = (BinaryExpression)expression;
+                    return divide.Left.ToMSSqlString() + " / " + divide.Right.ToMSSqlString();
+
+                case ExpressionType.GreaterThanOrEqual:
+                    var greaterThanOrEqual = (BinaryExpression)expression;
+                    return greaterThanOrEqual.Left.ToMSSqlString() + " >= " + greaterThanOrEqual.Right.ToMSSqlString();
+
+                case ExpressionType.LessThanOrEqual:
+                    var lessThanOrEqual = (BinaryExpression)expression;
+                    return lessThanOrEqual.Left.ToMSSqlString() + " <= " + lessThanOrEqual.Right.ToMSSqlString();
+
+                case ExpressionType.Not:
+                    var not = (UnaryExpression)expression;
+                    return "NOT " + not.Operand.ToMSSqlString();
+
+                default:
+                    throw new NotImplementedException(
+                        expression.GetType().ToString() + " " +
+                        expression.NodeType.ToString());
+            } 
+        }
+    }
+}

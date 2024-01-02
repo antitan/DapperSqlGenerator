@@ -36,7 +36,7 @@ namespace DapperSqlGenerator.Console
             constantsDir = helpersDir = registerServiceExtensionDir = configurationDir = cacheServiceDir = dataServiceDir = dataRepositoryDir = dataModelDir = @"C:\proj_net\testGenerator\ConsoleApp1";
 
             //excludes table we don't want ot generate
-            string[] excludedTables = { "__EFMigrationsHistory", "AspNetRoleClaims", "AspNetRoles", "AspNetUserClaims", "AspNetUserLogins", "AspNetUserRoles", "AspNetUsers", "AspNetUserTokens" };
+            string[] excludedTables = { "EFMigrationsHistory", "AspNetRoleClaims", "AspNetRoles", "AspNetUserClaims", "AspNetUserLogins", "AspNetUserRoles", "AspNetUsers", "AspNetUserTokens" };
             //references table (static tables)
             string[] refTables = { "Certification", "CountryCompany", "Department", "Lang" , "JobOfferLevel" };
 

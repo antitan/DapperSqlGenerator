@@ -58,6 +58,18 @@ namespace DapperSqlGenerator.Console.Services
             path = Path.Combine(helpersDir, Path.GetFileNameWithoutExtension(file) + ".cs");
             await File.WriteAllTextAsync(path, contentFile);
 
+            file = "./FilesToCopy/Helpers/ReflexionHelper.txt";
+            contentFile = File.ReadAllText(file);
+            contentFile = contentFile.Replace("{projectNamespace}", projectName);
+            path = Path.Combine(helpersDir, Path.GetFileNameWithoutExtension(file) + ".cs");
+            await File.WriteAllTextAsync(path, contentFile);
+
+            file = "./FilesToCopy/Helpers/ExpressionExtensions.txt";
+            contentFile = File.ReadAllText(file);
+            contentFile = contentFile.Replace("{projectNamespace}", projectName);
+            path = Path.Combine(helpersDir, Path.GetFileNameWithoutExtension(file) + ".cs");
+            await File.WriteAllTextAsync(path, contentFile);
+
         }
     }
 }

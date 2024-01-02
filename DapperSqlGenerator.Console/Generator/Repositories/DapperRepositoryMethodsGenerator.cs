@@ -13,7 +13,41 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
           this.table = table;
         }
 
+        #region DeleteByExpression
+
+        private string BuildDeleteByExpressionQuery()
+        {
+            return BuildDeleteQuery(" {criteria.ToMSSqlString()} ");
+        }
+
+        public string GenerateDeleteByExpressionMethod()
+        {
+            string query = BuildDeleteByExpressionQuery();
+            var entityClassName = table.Name.Parts[1];
+            string output = $@"
+                        /// <summary>
+                        /// Delete {entityClassName}
+                        /// </summary>
+                        public async Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
+                        {{
+                            using (var connection = new SqlConnection(connectionString))
+                            {{  
+                                await connection.ExecuteAsync($""{query}"");
+                            }}
+                        }}" + Environment.NewLine;
+
+            return output;
+        }
+
+        #endregion DeleteByExpression
+
         #region Delete
+
+        private string BuildDeleteQuery(string where)
+        {
+            string query = $"DELETE FROM {table.Name} WHERE {where}";
+            return query;
+        }
 
         private string BuildDeleteQuery()
         {
@@ -30,9 +64,8 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
             {
                 var colName = col.Name.Parts[2];
                 return $"[{colName}] = @{colName}";
-            }));
-            query = $"DELETE FROM {table.Name} WHERE {whereClause_conditions}";
-            return query;
+            })); 
+            return BuildDeleteQuery(whereClause_conditions);
         }
 
         public string GenerateDeleteMethod()
@@ -54,7 +87,7 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
                         /// <summary>
                         /// Delete {entityClassName}
                         /// </summary>
-                        public async Task DeleteBy{pkFieldsNames}({pkFieldsWithTypes})
+                        public async Task DeleteBy{pkFieldsNames}Async({pkFieldsWithTypes})
                         {{
                             using (var connection = new SqlConnection(connectionString))
                             {{
@@ -85,10 +118,41 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
             query = $"SELECT {select_columns} FROM {table.Name} ";
             if(whereClause != null)
             {
-                query += "WHERE " + whereClause;
+                query += " WHERE " + whereClause;
             }
             return query;
         }
+
+
+        #region GetByExpression Method
+
+        private string BuildGetByExpressioQuery()
+        {
+            return BuildSelectTableFileds(" {criteria.ToMSSqlString()} ");
+        }
+
+        public string GenerateGetByExpressionMethod()
+        {
+            string query = BuildGetByExpressioQuery();
+            var entityClassName = table.Name.Parts[1];
+            string output = $@"
+                /// <summary>
+                /// Get {entityClassName} by expression 
+                /// </summary>
+                public async Task<IEnumerable<{entityClassName}>> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
+                {{
+                    using (var connection = new SqlConnection(connectionString))
+                    {{ 
+                        var entities = await connection.QueryAsync<{entityClassName}>($""{query}"");
+                        return entities;
+                    }}
+                }}";
+
+            return output;
+        }
+
+        #endregion GetByExpression Method
+
 
         #region GetAll Method
 
@@ -105,7 +169,7 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
                 /// <summary>
                 /// Get all {entityClassName}
                 /// </summary>
-                public async Task<IEnumerable<{entityClassName}>> GetAll()
+                public async Task<IEnumerable<{entityClassName}>> GetAllAsync()
                 {{
                     using (var connection = new SqlConnection(connectionString))
                     {{
@@ -166,7 +230,7 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
                 /// <summary>
                 /// Get {entityClassName} by PK
                 /// </summary>
-                public async Task<{entityClassName}> GetBy{pkFieldsNames}({pkFieldsWithTypes})
+                public async Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
                 {{
                     using (var connection = new SqlConnection(connectionString))
                     {{
@@ -249,7 +313,7 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
             /// <summary>
             /// Insert {entityClassName}
             /// </summary>
-            public async  Task<{returnType}> Insert({entityClassName} {paramName})
+            public async  Task<{returnType}> InsertAsync({entityClassName} {paramName})
             {{
                 using (var connection = new SqlConnection(connectionString))
                 {{
@@ -321,7 +385,7 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
         /// <summary>
         /// Update {entityClassName}
         /// </summary>
-        public async Task Update({entityClassName} {paramName})
+        public async Task UpdateAsync({entityClassName} {paramName})
         {{
             using (var connection = new SqlConnection(connectionString))
             {{
@@ -336,5 +400,6 @@ namespace DapperSqlGenerator.Console.Generator.Repositories
             return output;
         }
         #endregion Update Method
+
     }
 }

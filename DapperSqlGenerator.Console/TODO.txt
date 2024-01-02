@@ -1,0 +1,17 @@
+
+- remplacer Generated si fichier existe
+
+ var filePath = @"C:\proj_net\testGenerator\ConsoleApp1\SkillRepository.cs";
+            string fileContent = File.ReadAllText(filePath);
+            // Création de l'expression régulière pour trouver la région Generated
+            string pattern = @"#region Generated.*?#endregion Generated";
+            string replacement = "#region Generated\n\n    //toto\n\n#endregion Generated";
+
+            // Remplacement de la région par "toto"
+            string newFileContent = Regex.Replace(fileContent, pattern, replacement, RegexOptions.Singleline);
+
+            // Sauvegarde du fichier modifié
+            File.WriteAllText(filePath, newFileContent);
+
+- implementer paging (stored proc ?)
+- stored procedures

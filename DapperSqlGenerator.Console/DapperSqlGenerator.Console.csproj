@@ -26,7 +26,13 @@
     <None Update="FilesToCopy\Constants\CacheDataConstants.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="FilesToCopy\Helpers\ExpressionExtensions.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="FilesToCopy\Helpers\JsonHelper.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FilesToCopy\Helpers\ReflexionHelper.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="FilesToCopy\Helpers\StringHelpers.txt">
@@ -39,7 +45,6 @@
 
   <ItemGroup>
     <Folder Include="FilesToCopy\Configuration\" />
-    <Folder Include="FilesToCopy\Helpers\" />
     <Folder Include="FilesToCopy\Constants\" />
     <Folder Include="FilesToCopy\ServiceExtensions\" />
   </ItemGroup>

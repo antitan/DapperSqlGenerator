@@ -6,7 +6,7 @@ namespace {projectNamespace}.Common.Cache
 
         Task<T> GetAsync<T>(string key);
 
-        void Add<T>(string key, T value, int? cacheTime=null);
+        void Add<T>(string key, T value, int? cacheTime=3);
 
         bool IsSet(string key);
 
