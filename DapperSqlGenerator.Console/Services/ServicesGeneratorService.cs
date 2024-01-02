@@ -42,7 +42,7 @@ namespace DapperSqlGenerator.Console.Services
                             if (cs != string.Empty)
                             {
                                 string formatedCode = CodeFormatterHelper.ReformatCode(cs);
-                                writer.WriteLine(formatedCode);
+                                await writer.WriteLineAsync(formatedCode);
                             }
                         }
                     }
