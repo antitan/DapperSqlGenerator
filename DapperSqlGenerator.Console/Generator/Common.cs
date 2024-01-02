@@ -33,7 +33,7 @@ namespace DapperSqlGenerator.Console.Generator
             return String.Join(" && ", pkColumns.Select(col =>
             {
                 var colName = col.Name.Parts[2];
-                return $"f.{colName} == {colName}";
+                return $"f.{colName} == {Common.FirstCharacterToLower(colName.PascalCase())}";
             }));
         }
 
@@ -70,6 +70,22 @@ namespace DapperSqlGenerator.Console.Generator
                           var memberType = MatchingDataTypeHelper.GetDotNetDataType(colDataType, false);
 
                           return $"{memberType} {Common.FirstCharacterToLower(colName.PascalCase())}";
+                      })
+                    );
+        }
+
+        /// <summary>
+        /// Concat pk fields for call : PkIdPart1,PkIdPart2
+        /// </summary>
+        /// <returns></returns>
+        public static string ConcatPkFieldsWithComma(TSqlObject table)
+        {
+            var pkColumns = table.GetPrimaryKeyColumns();
+            return String.Join(", ",
+                      pkColumns.Select(col =>
+                      {
+                          var colName = col.Name.Parts[2]; 
+                          return $"{Common.FirstCharacterToLower(colName.PascalCase())}";
                       })
                     );
         }

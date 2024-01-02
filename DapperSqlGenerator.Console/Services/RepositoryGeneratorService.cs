@@ -17,12 +17,14 @@ namespace DapperSqlGenerator.Console.Services
         string dataRepostioryNamespace;
         string dirToWrite;
         string[] excludedTables;
-        public RepositoryGeneratorService(string datamodelNamespace,  string dataRepostioryNamespace, string dirToWrite, string[] excludedTables)
+        string projectName;
+        public RepositoryGeneratorService(string datamodelNamespace,  string dataRepostioryNamespace, string dirToWrite, string projectName,string[] excludedTables)
         { 
             this.datamodelNamespace= datamodelNamespace;
             this.dataRepostioryNamespace = dataRepostioryNamespace;
             this.dirToWrite = dirToWrite;
-            this.excludedTables = excludedTables;   
+            this.excludedTables = excludedTables;
+            this.projectName = projectName;
         }
 
         public async Task GenerateFilesAsync(TSqlModel model)
@@ -37,7 +39,7 @@ namespace DapperSqlGenerator.Console.Services
                     {
                         using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
                         {
-                            string cs = new DapperRepositoryClassGenerator(datamodelNamespace, dataRepostioryNamespace, table).Generate();
+                            string cs = new DapperRepositoryClassGenerator(projectName, datamodelNamespace, dataRepostioryNamespace, table).Generate();
                             if (cs != string.Empty)
                             {
                                 string formatedCode = CodeFormatterHelper.ReformatCode(cs);

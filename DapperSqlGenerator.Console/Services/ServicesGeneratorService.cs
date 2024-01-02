@@ -11,16 +11,18 @@ namespace DapperSqlGenerator.Console.Services
         string projectName;
         string dataModelNamespace;
         string serviceModelNamespace;
+        string dataRepositoryNamespace;
         string dirToWrite;
         string[] excludedTables;
         string[] refTables;
-        public ServicesGeneratorService(string serviceModelNamespace, string dataModelNamespace, string dirToWrite, string projectName, string[] excludedTables, string[] refTables)
+        public ServicesGeneratorService(string serviceModelNamespace, string dataModelNamespace, string dataRepositoryNamespace, string dirToWrite, string projectName, string[] excludedTables, string[] refTables)
         {
             this.serviceModelNamespace = serviceModelNamespace;
             this.dirToWrite = dirToWrite;
             this.excludedTables = excludedTables;
             this.refTables = refTables;
             this.dataModelNamespace = dataModelNamespace;
+            this.dataRepositoryNamespace = dataRepositoryNamespace;
             this.projectName = projectName;
         }
 
@@ -36,7 +38,7 @@ namespace DapperSqlGenerator.Console.Services
                     {
                         using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
                         {
-                            string cs = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, projectName, refTables, table).Generate();
+                            string cs = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, dataRepositoryNamespace, projectName, refTables, table).Generate();
                             if (cs != string.Empty)
                             {
                                 string formatedCode = CodeFormatterHelper.ReformatCode(cs);

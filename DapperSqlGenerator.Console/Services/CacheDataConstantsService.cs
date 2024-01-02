@@ -37,7 +37,7 @@ namespace DapperSqlGenerator.Console.Services
                     listCacheDataKeys.Add($"public static string {entityName}AllCacheKey = \"{entityName}.all\";"); 
                 }
             }
-             
+            contentFile = contentFile.Replace("{projectNamespace}", projectName);
             contentFile = contentFile.Replace("{CacheDataKeys}", string.Join(Environment.NewLine, listCacheDataKeys));
             await File.WriteAllTextAsync(filePathToWrite, contentFile);
         }

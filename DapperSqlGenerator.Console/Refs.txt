@@ -1,0 +1,20 @@
+Microsoft.Extensions.Options -> Ioption
+Microsoft.Data.SqlClient -> SQLCONNECTION
+
+pour repositroy :
+
+<PackageReference Include="Dapper" Version="2.1.24" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+
+
+    pour service :
+    ilooger
+      <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+
+      pour common :
+      <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" /> 
+
+
+      pour un projetConsole:
+       <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
