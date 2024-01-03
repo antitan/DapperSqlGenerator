@@ -16,6 +16,15 @@ namespace DapperSqlGenerator.Console.Services
         string[] refTables;
         string projectName;
         string contentFile;
+
+        public List<string> Warnings
+        {
+            get
+            {
+                return new List<string>();  
+            }
+        }
+
         public CacheDataConstantsService(string filePathToWrite, string contentFile, string[] excludedTables, string[] refTables, string projectName)
         {
             this.filePathToWrite = filePathToWrite;

@@ -15,6 +15,15 @@ namespace DapperSqlGenerator.Console.Services
         string dirToWrite;
         string[] excludedTables;
         string[] refTables;
+
+        public List<string> Warnings
+        {
+            get
+            {
+                return new List<string>();
+            }
+        }
+
         public ServicesGeneratorService(string serviceModelNamespace, string dataModelNamespace, string dataRepositoryNamespace, string dirToWrite, string projectName, string[] excludedTables, string[] refTables)
         {
             this.serviceModelNamespace = serviceModelNamespace;
@@ -34,15 +43,18 @@ namespace DapperSqlGenerator.Console.Services
                 if (!excludedTables.Contains(entityName))
                 {
                     string filePath = Path.Combine(dirToWrite, $"{entityName}Service.cs");
-                    using (var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
+                    if (!File.Exists(filePath))
                     {
-                        using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
+                        using (var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
                         {
-                            string cs = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, dataRepositoryNamespace, projectName, refTables, table).Generate();
-                            if (cs != string.Empty)
+                            using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
                             {
-                                string formatedCode = CodeFormatterHelper.ReformatCode(cs);
-                                await writer.WriteLineAsync(formatedCode);
+                                string cs = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, dataRepositoryNamespace, projectName, refTables, table).Generate();
+                                if (cs != string.Empty)
+                                {
+                                    string formatedCode = CodeFormatterHelper.ReformatCode(cs);
+                                    await writer.WriteLineAsync(formatedCode);
+                                }
                             }
                         }
                     }

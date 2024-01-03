@@ -16,6 +16,14 @@ namespace DapperSqlGenerator.Console.Services
         string[] excludedTables;
         string projectName;
         string contentFile;
+
+        public List<string> Warnings
+        {
+            get
+            {
+                return new List<string>();
+            }
+        }
         public ExtensionRegisterReposAndServices(string filePathToWrite, string contentFile, string[] excludedTables, string projectName)
         { 
             this.filePathToWrite = filePathToWrite;

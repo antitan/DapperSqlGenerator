@@ -1,4 +1,5 @@
-﻿using DapperSqlGenerator.Console.Extenions;
+﻿using DapperSqlGenerator.Console.Exceptions;
+using DapperSqlGenerator.Console.Extenions;
 using DapperSqlGenerator.Console.Generator;
 using DapperSqlGenerator.Console.Generator.Repositories;
 using DapperSqlGenerator.Console.Helpers;
@@ -6,7 +7,10 @@ using Microsoft.SqlServer.Dac.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace DapperSqlGenerator.Console.Services
@@ -18,6 +22,16 @@ namespace DapperSqlGenerator.Console.Services
         string dirToWrite;
         string[] excludedTables;
         string projectName;
+        List<string> warnings;
+
+        public List<string> Warnings
+        {
+            get
+            {
+                return warnings;
+            }
+        }
+
         public RepositoryGeneratorService(string datamodelNamespace,  string dataRepostioryNamespace, string dirToWrite, string projectName,string[] excludedTables)
         { 
             this.datamodelNamespace= datamodelNamespace;
@@ -25,7 +39,41 @@ namespace DapperSqlGenerator.Console.Services
             this.dirToWrite = dirToWrite;
             this.excludedTables = excludedTables;
             this.projectName = projectName;
+            warnings = new List<string>();
         }
+
+
+
+        private string ExtractGeneratedRegion(string csCode)
+        {
+            string regionContent = string.Empty;
+            string pattern = @"#region Generated(.*?)#endregion Generated";
+
+            // Recherche du contenu de la région Generated
+            Match match = Regex.Match(csCode, pattern, RegexOptions.Singleline);
+
+            if (match.Success)
+            {
+                // Extraction du contenu de la région Generated
+                 regionContent = match.Groups[1].Value;
+            }
+            else
+            {
+                throw new RegionGeneratedNotFoundException();
+            }
+
+            return regionContent;   
+        }
+
+        private void ReplaceGeneratedRegion(string existingCs,string extractedRegionContent, string filePathToReplace)
+        {
+            string pattern = @"#region Generated.*?#endregion Generated";
+            string newContentToInsert = $"#region Generated\n\n {extractedRegionContent}\n\n#endregion Generated";
+            string newFileContent = Regex.Replace(existingCs, pattern, newContentToInsert, RegexOptions.Singleline);
+            string formatedCode = CodeFormatterHelper.ReformatCode(newFileContent);
+            File.WriteAllText(filePathToReplace, formatedCode);
+        }
+         
 
         public async Task GenerateFilesAsync(TSqlModel model)
         { 
@@ -35,16 +83,58 @@ namespace DapperSqlGenerator.Console.Services
                 if (!excludedTables.Contains(entityName))
                 {
                     string filePath = Path.Combine(dirToWrite, $"{entityName}Repository.cs");
-                    using (var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
+                    bool hasWarning = false;
+                    if (!File.Exists(filePath))
                     {
-                        using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
+                        using (var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
                         {
-                            string cs = new DapperRepositoryClassGenerator(projectName, datamodelNamespace, dataRepostioryNamespace, table).Generate();
-                            if (cs != string.Empty)
+                            using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
                             {
-                                string formatedCode = CodeFormatterHelper.ReformatCode(cs);
-                                await writer.WriteLineAsync(formatedCode);
+                                string cs = new DapperRepositoryClassGenerator(projectName, datamodelNamespace, dataRepostioryNamespace, table).Generate();
+                                if (cs != string.Empty)
+                                {
+                                    string formatedCode = CodeFormatterHelper.ReformatCode(cs);
+                                    await writer.WriteLineAsync(formatedCode);
+                                }
                             }
+                        }
+                    }
+                    else
+                    {
+                        string existingCs = File.ReadAllText(filePath);
+                        string newCs = new DapperRepositoryClassGenerator(projectName, datamodelNamespace, dataRepostioryNamespace, table).Generate();
+
+                        string extractedRegionContentFromNewFile = string.Empty;
+                        try
+                        {
+                            extractedRegionContentFromNewFile = ExtractGeneratedRegion(newCs);
+                        }
+                        catch(RegionGeneratedNotFoundException ex)
+                        {
+                            warnings.Add(" Problem to extract Generated Section from generated Code, Generated Section not found");
+                            hasWarning = true;
+                        }
+                        string extractedRegionContentFromExstingFile = string.Empty;
+                        try
+                        {
+                            extractedRegionContentFromExstingFile = ExtractGeneratedRegion(existingCs);
+                        }
+                        catch (RegionGeneratedNotFoundException ex)
+                        {
+                            warnings.Add($" Problem to extract Generated Section from existing File {filePath}, Generated Section not found ");
+                            hasWarning = true;
+                        }
+                        if (!hasWarning)
+                        {
+                            //implement a guard
+                            var extractedNumberMethodsFromNewFile = ClassHelper.CountOccurrences(extractedRegionContentFromNewFile,"public");
+                            var extractedNumberMethodsFromExistingFile = ClassHelper.CountOccurrences(extractedRegionContentFromExstingFile, "public");
+                            if(extractedNumberMethodsFromNewFile < extractedNumberMethodsFromExistingFile)
+                            {
+                                warnings.Add($" File {filePath} will be not updated because you wrote some methods inside Generated Region, move no generated methods out this region");
+                            }
+                            else
+                                ReplaceGeneratedRegion(existingCs, extractedRegionContentFromNewFile, filePath);
                         }
                     }
                 }

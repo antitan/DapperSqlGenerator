@@ -13,6 +13,14 @@ namespace DapperSqlGenerator.Console.Services
         string cacheServiceDir;
         string configurationDir;
         string helpersDir;
+
+        public List<string> Warnings
+        {
+            get
+            {
+                return new List<string>();
+            }
+        }
         public CopyUtilitiesFilesService(string projectName, string cacheServiceDir, string configurationDir,   string helpersDir)
         {
             this.projectName = projectName; 

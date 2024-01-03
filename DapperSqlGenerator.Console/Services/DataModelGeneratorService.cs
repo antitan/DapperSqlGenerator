@@ -11,6 +11,15 @@ namespace DapperSqlGenerator.Console.Services
         string dataModelNamespace;
         string dirToWrite;
         string[] excludedTables;
+
+        public List<string> Warnings
+        {
+            get
+            {
+                return new List<string>();
+            }
+        }
+
         public DataModelGeneratorService(string dataModelNamespace, string dirToWrite,string [] excludedTables)
         {
             this.dataModelNamespace = dataModelNamespace;

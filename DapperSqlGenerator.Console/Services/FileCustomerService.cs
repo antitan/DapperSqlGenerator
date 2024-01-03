@@ -16,6 +16,14 @@ namespace DapperSqlGenerator.Console.Services
         string[] refTables;
         string registerServiceExtensionDir;
         string constantsDir;
+
+        public List<string> Warnings
+        {
+            get
+            {
+                return new List<string>();
+            }
+        }
         public FileCustomerService(string projectName,  string registerServiceExtensionDir, string constantsDir,string[] excludedTables, string[] refTables)
         {
             this.projectName = projectName;

@@ -68,6 +68,23 @@ namespace DapperSqlGenerator.Console
             });
             await Task.WhenAll(tasks).ConfigureAwait(false);
 
+            var warnings = generatorServices.SelectMany(s => s.Warnings);
+            bool hasWarning = warnings.Any();
+            if(hasWarning)
+            {
+                System.Console.ForegroundColor = ConsoleColor.Red;
+                System.Console.WriteLine($"--SOME WARNINGS--");
+            }
+            foreach (var warning in warnings)
+            {
+                //Console.WriteLine(warning);
+                System.Console.WriteLine(warning);  
+            } 
+            if (hasWarning)
+            { 
+                System.Console.ReadLine();
+            }
+
 
             //TODO read StoredProcedure
         }
