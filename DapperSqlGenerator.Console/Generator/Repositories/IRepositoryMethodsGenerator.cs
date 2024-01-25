@@ -1,4 +1,4 @@
-﻿namespace DapperSqlGenerator.Console.Generator.Repositories
+﻿namespace DapperSqlGenerator.App.Generator.Repositories
 {
     public interface IRepositoryMethodsGenerator
     {

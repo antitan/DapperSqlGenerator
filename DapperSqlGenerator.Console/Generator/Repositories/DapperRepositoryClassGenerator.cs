@@ -1,15 +1,9 @@
-﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Helpers;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
+﻿
+using DapperSqlGenerator.App.Extenions;
+using DapperSqlGenerator.App.Helpers;
 using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Generator.Repositories
+namespace DapperSqlGenerator.App.Generator.Repositories
 {
     public class DapperRepositoryClassGenerator : IGenerate
     {

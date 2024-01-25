@@ -1,15 +1,9 @@
-﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Generator.Entities;
-using DapperSqlGenerator.Console.Helpers;
+﻿
+using DapperSqlGenerator.App.Extenions;
 using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Services
-{ 
+namespace DapperSqlGenerator.App.Services
+{
     public class ExtensionRegisterReposAndServices : IGeneratorService
     {
         string filePathToWrite;

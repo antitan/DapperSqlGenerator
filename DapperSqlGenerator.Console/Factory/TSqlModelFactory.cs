@@ -1,11 +1,6 @@
 ﻿using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Factory
+namespace DapperSqlGenerator.App.Factory
 {
     public class TSqlModelFactory
     {

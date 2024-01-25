@@ -1,14 +1,9 @@
-﻿using DapperSqlGenerator.Console.Generator.Entities;
-using DapperSqlGenerator.Console.Generator.Repositories;
-using DapperSqlGenerator.Console.Helpers;
+﻿using DapperSqlGenerator.App.Generator.Repositories;
+using DapperSqlGenerator.App.Helpers;
 using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Services
+namespace DapperSqlGenerator.App.Services
 {
     public class StoredProcedureGeneratorService : IGeneratorService
     { 
@@ -36,6 +31,7 @@ namespace DapperSqlGenerator.Console.Services
             var objs = model.GetObjects(DacQueryScopes.All, Procedure.TypeClass).ToList();
             foreach (var proc in objs)
             {
+                 
                 var storedProcedureName = proc.Name.Parts[1].Replace("[", string.Empty).Replace("]", string.Empty);
                 Dictionary<string, string> paramNamesTypes = new Dictionary<string, string>();
                 foreach (var parameter in proc.GetChildren().Where(child => child.ObjectType.Name == "Parameter"))

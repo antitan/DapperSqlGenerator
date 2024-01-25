@@ -1,13 +1,8 @@
-﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Helpers;
+﻿using DapperSqlGenerator.App.Extenions;
+using DapperSqlGenerator.App.Helpers;
 using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Generator
+namespace DapperSqlGenerator.App.Generator
 {
     public static class Common
     {

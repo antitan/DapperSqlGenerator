@@ -1,6 +1,6 @@
 ﻿using Microsoft.SqlServer.Dac.Model;
 
-namespace DapperSqlGenerator.Console.Services
+namespace DapperSqlGenerator.App.Services
 {
     public interface IGeneratorService
     {

@@ -1,13 +1,7 @@
 ﻿using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Services
-{ 
+namespace DapperSqlGenerator.App.Services
+{
     public class FileCustomerService : IGeneratorService
     {
 

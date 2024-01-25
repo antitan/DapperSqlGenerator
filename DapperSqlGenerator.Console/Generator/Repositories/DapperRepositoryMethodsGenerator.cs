@@ -1,8 +1,9 @@
-﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Helpers;
+﻿
+using DapperSqlGenerator.App.Extenions;
+using DapperSqlGenerator.App.Helpers;
 using Microsoft.SqlServer.Dac.Model; 
 
-namespace DapperSqlGenerator.Console.Generator.Repositories
+namespace DapperSqlGenerator.App.Generator.Repositories
 {
     public class DapperRepositoryMethodsGenerator : IRepositoryMethodsGenerator
     { 

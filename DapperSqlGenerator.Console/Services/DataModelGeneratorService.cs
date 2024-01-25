@@ -1,10 +1,11 @@
-﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Generator.Entities;
-using DapperSqlGenerator.Console.Helpers;
+﻿
+using DapperSqlGenerator.App.Extenions;
+using DapperSqlGenerator.App.Generator.Entities;
+using DapperSqlGenerator.App.Helpers;
 using Microsoft.SqlServer.Dac.Model;
 using System.Text;
 
-namespace DapperSqlGenerator.Console.Services
+namespace DapperSqlGenerator.App.Services
 {
     public class DataModelGeneratorService : IGeneratorService
     {

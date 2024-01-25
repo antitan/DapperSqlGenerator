@@ -1,20 +1,14 @@
-﻿using DapperSqlGenerator.Console.Exceptions;
-using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Generator;
-using DapperSqlGenerator.Console.Generator.Repositories;
-using DapperSqlGenerator.Console.Helpers;
+﻿
+using DapperSqlGenerator.App.Exceptions;
+using DapperSqlGenerator.App.Extenions;
+using DapperSqlGenerator.App.Generator.Repositories;
+using DapperSqlGenerator.App.Helpers;
 using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Services
-{ 
+namespace DapperSqlGenerator.App.Services
+{
     public class RepositoryGeneratorService : IGeneratorService
     {
         string datamodelNamespace;

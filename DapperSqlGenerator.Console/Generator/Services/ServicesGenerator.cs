@@ -1,8 +1,8 @@
-﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Helpers;
+﻿using DapperSqlGenerator.App.Extenions;
+using DapperSqlGenerator.App.Helpers; 
 using Microsoft.SqlServer.Dac.Model;
 
-namespace DapperSqlGenerator.Console.Generator.Services
+namespace DapperSqlGenerator.App.Generator.Services
 {
     public class ServicesGenerator : IGenerate
     {

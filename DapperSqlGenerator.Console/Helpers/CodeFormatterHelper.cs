@@ -1,10 +1,8 @@
-﻿using System;
-using System.IO;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;
 
-namespace DapperSqlGenerator.Console.Helpers
+namespace DapperSqlGenerator.App.Helpers
 {
     public class CodeFormatterHelper
     {

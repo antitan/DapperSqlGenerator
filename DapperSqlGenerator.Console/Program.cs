@@ -1,11 +1,8 @@
-﻿using DapperSqlGenerator.Console.Extenions;
-using DapperSqlGenerator.Console.Factory;
-using DapperSqlGenerator.Console.Generator.Repositories;
-using DapperSqlGenerator.Console.Services;
-using Microsoft.SqlServer.Dac.Model;
-using System.Reflection;
+﻿using DapperSqlGenerator.App.Extenions;
+using DapperSqlGenerator.App.Factory;
+using DapperSqlGenerator.App.Services;
 
-namespace DapperSqlGenerator.Console
+namespace DapperSqlGenerator.App
 {
     internal class Program
     {

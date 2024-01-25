@@ -1,14 +1,10 @@
-﻿using DapperSqlGenerator.Console.Extenions;
+﻿
+using DapperSqlGenerator.App.Extenions;
 using Microsoft.SqlServer.Dac.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DapperSqlGenerator.Console.Services
+namespace DapperSqlGenerator.App.Services
 {
-   
+
     public class CacheDataConstantsService : IGeneratorService
     {
         string filePathToWrite;
