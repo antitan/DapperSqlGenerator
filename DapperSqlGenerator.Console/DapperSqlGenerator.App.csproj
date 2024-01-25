@@ -39,6 +39,9 @@
     <None Update="FilesToCopy\Helpers\StringHelpers.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="FilesToCopy\Pagination\PagedResults.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="FilesToCopy\ServiceExtensions\ServicesAndRepositoriesExtensions.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

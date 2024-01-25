@@ -70,7 +70,7 @@ namespace DapperSqlGenerator.App
             //await new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataRepostioryNamespace, dataServiceDir, projectName, excludedTables, refTables).GenerateFilesAsync(model);
             //await new CopyUtilitiesFilesService(projectName, cacheServiceDir, configurationDir, helpersDir).GenerateFilesAsync(model);
             //await new FileCustomerService(projectName, registerServiceExtensionDir, constantsDir, excludedTables, refTables).GenerateFilesAsync(model);
-            //await new StoredProcedureGeneratorService(dataRepostioryNamespace, spDir).GenerateFilesAsync(model);
+            //await new StoredProcedureGeneratorService(projectName, dataRepostioryNamespace, spDir).GenerateFilesAsync(model);
 
             List<Task> tasks = new List<Task>();
             generatorServices.ForEach(serv =>

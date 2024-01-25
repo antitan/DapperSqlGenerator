@@ -154,6 +154,35 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         #endregion GetByExpression Method
 
+        #region GetByExpression Method 
+
+        private string BuildGetAllPaginatedQuery()
+        {
+            return string.Empty;
+        }
+
+        public string GenerateGetAllPaginatedMethod()
+        {
+        https://www.davepaquette.com/archive/2019/01/28/paging-large-result-sets-with-dapper-and-sql-server.aspx
+            string query = BuildGetAllPaginatedQuery();
+            var entityClassName = table.Name.Parts[1];
+            string output = $@"
+                /// <summary>
+                /// Get paginated {entityClassName}
+                /// </summary>
+                public async Task<PagedResults<{entityClassName}>> GetAllPaginatedAsync(int page=1, int pageSize=10)
+                {{
+                    using (var connection = new SqlConnection(connectionString))
+                    {{
+                        var entities = await connection.QueryAsync<{entityClassName}>(""{query}"");
+                        return entities;
+                    }}
+                }}";
+
+            return output;
+        }
+
+        #endregion GetAllPaginated Method 
 
         #region GetAll Method
 

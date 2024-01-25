@@ -1,4 +1,5 @@
 ﻿
+using DapperSqlGenerator.App.Extenions;
 using DapperSqlGenerator.App.Helpers;
 
 namespace DapperSqlGenerator.App.Generator.Repositories
@@ -19,11 +20,10 @@ namespace DapperSqlGenerator.App.Generator.Repositories
         public string Generate()
         {
             return $"using Dapper;" + Environment.NewLine +
-                    $"using System.Linq.Expressions;" + Environment.NewLine + 
-                    $"using {projectName}.Common.Configuration;" + Environment.NewLine +
-                    $"using {projectName}.Common.Helpers;" + Environment.NewLine +
+                    $"using {projectName}.Common.Configuration;" + Environment.NewLine + 
                     $"using Microsoft.Extensions.Options;" + Environment.NewLine +
                     $"using Microsoft.Data.SqlClient;" + Environment.NewLine +
+                    $"using System.Data;" + Environment.NewLine +
             $@"namespace {repositoryNamespace} {{
 
                         {GenerateClass()}
@@ -47,14 +47,16 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
             string spNormalParams = String.Join(Environment.NewLine + "            ",
             paramNamesTypes.Keys.Select(col =>
-            { 
-                return $@"p.Add(""@{col}"",""{col}"");";
+            {
+                var varname = Common.FirstCharacterToLower(col.PascalCase());
+                return $@"p.Add(""@{col}"",{varname});";
             }));
 
             string paramList = string.Empty;    
             foreach ( var kvp in paramNamesTypes)
             {
-                paramList += MatchingDataTypeHelper.GetDotNetDataType(kvp.Value) + " " + kvp.Key + " ,";
+                var varname = Common.FirstCharacterToLower(kvp.Key.PascalCase());
+                paramList += MatchingDataTypeHelper.GetDotNetDataType(kvp.Value) + " " + varname + " ,";
             }
             paramList = paramList.TrimEnd(',');    
 
@@ -70,7 +72,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                       var p = new DynamicParameters();
                       {spNormalParams}
 
-                      var result = await connection.{dapperOperator}(""[{{this.storedProcedureName}}]"", p, commandType: CommandType.StoredProcedure);
+                      var result = await connection.{dapperOperator}(""[{this.storedProcedureName}]"", p, commandType: CommandType.StoredProcedure);
                   }}
            
               }}" + Environment.NewLine;

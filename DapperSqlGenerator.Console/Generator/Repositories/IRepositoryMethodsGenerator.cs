@@ -7,6 +7,7 @@
         string GenerateDeleteMethod();
         string GenerateDeleteByExpressionMethod();
         string GenerateGetAllMethod();
+        string GenerateGetAllPaginatedMethod();
         string GenerateGetByPKMethod();
         string GenerateGetByExpressionMethod();
     }

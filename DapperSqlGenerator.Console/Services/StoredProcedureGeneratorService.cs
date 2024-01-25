@@ -31,7 +31,7 @@ namespace DapperSqlGenerator.App.Services
             var objs = model.GetObjects(DacQueryScopes.All, Procedure.TypeClass).ToList();
             foreach (var proc in objs)
             {
-                 
+                Console.WriteLine("Create StoredProcedure Access " + proc.Name);
                 var storedProcedureName = proc.Name.Parts[1].Replace("[", string.Empty).Replace("]", string.Empty);
                 Dictionary<string, string> paramNamesTypes = new Dictionary<string, string>();
                 foreach (var parameter in proc.GetChildren().Where(child => child.ObjectType.Name == "Parameter"))

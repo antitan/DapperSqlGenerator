@@ -30,6 +30,7 @@ namespace DapperSqlGenerator.App.Generator.Services
                     $"using System.Text.Json;" + Environment.NewLine +
                     $"using System.Linq.Expressions;" + Environment.NewLine +
                     $"using {projectName}.Common.Helpers;" + Environment.NewLine +
+                    $"using {projectName}.Common.Pagination;" + Environment.NewLine +
                     $"using {projectName}.Common.Constants;" + Environment.NewLine +
                     $"using {projectName}.Common.Cache;" + Environment.NewLine +
                     $"using {dataModelNamespace};" + Environment.NewLine +
@@ -90,6 +91,7 @@ namespace DapperSqlGenerator.App.Generator.Services
             yield return GenerateUpdateDelegate(entityClassName);
             yield return GenerateDeleteDelegate(entityClassName);
             if (isRefTable) yield return GenerateGetAllRefDelegate(entityClassName);
+            yield return GenerateGetAllPaginatedDelegate(entityClassName);
             yield return GenerateGetByPkDelegate(entityClassName);
             yield return GenerateGetByExpressionDelegate(entityClassName);
             yield return GenerateDeleteByExpressionDelegate(entityClassName);
@@ -169,29 +171,26 @@ namespace DapperSqlGenerator.App.Generator.Services
 
             return output;
         }
-        private string GenerateGetByRefPkDelegate(string entityClassName)
-        { 
-            var pkFieldsNames = Common.ConcatPkFieldNames(table);
-            var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table); 
-
+        
+        private string GenerateGetAllPaginatedDelegate(string entityClassName)
+        {
             string output = $@"
-                /// <summary>
-                /// Get {entityClassName} by PK
-                /// </summary>
-                public async Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
-                {{
-                    {entityClassName} result = null;
-                    try
+                 /// <summary>
+                 /// Get paginated {entityClassName}
+                 /// </summary>
+                 public async Task<PagedResults<{entityClassName}>> GetAllPaginatedAsync(int page=1, int pageSize=10)
+                 {{ 
+                      PagedResults<{entityClassName}> result = null;
+                      try
+                      {{
+                         result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetAllPaginatedAsync(page,pageSize)
+                      }}
+                    catch (Exception ex)
                     {{
-                         result = (await GetAllAsync()).FirstOrDefault(f=> {Common.ConcatPkFieldNamesForLinq(table)}); 
+                        logger.LogError($"" Problem to GetAllPaginatedAsync {entityClassName}  error : {{ex}}"");
                     }}
-                    catch(Exception ex)
-                    {{
-                        logger.LogError($"" Problem to GetBy{pkFieldsNames}  {entityClassName}  error : {{ex}}"");
-                    }} 
                     return result;
-                    
-                }}" + Environment.NewLine;
+                 }}";
 
             return output;
         }
@@ -345,6 +344,9 @@ namespace DapperSqlGenerator.App.Generator.Services
             //Get all
             if(isRefTable)
                 yield return $"Task<IEnumerable<{entityClassName}>> GetAllAsync();";
+
+            //Get Paginated Entities
+            yield return $"Task<PagedResults<{entityClassName}>> GetAllPaginatedAsync(int page=1, int pageSize=10);";
 
             //Get by Primary key
             yield return $"Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";

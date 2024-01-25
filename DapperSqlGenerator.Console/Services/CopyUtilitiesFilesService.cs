@@ -73,6 +73,11 @@ namespace DapperSqlGenerator.App.Services
             path = Path.Combine(helpersDir, Path.GetFileNameWithoutExtension(file) + ".cs");
             await File.WriteAllTextAsync(path, contentFile);
 
+            file = "./FilesToCopy/Pagination/PagedResults.txt";
+            contentFile = File.ReadAllText(file);
+            contentFile = contentFile.Replace("{projectNamespace}", projectName);
+            path = Path.Combine(helpersDir, Path.GetFileNameWithoutExtension(file) + ".cs");
+            await File.WriteAllTextAsync(path, contentFile);
         }
     }
 }
