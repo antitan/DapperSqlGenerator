@@ -178,12 +178,12 @@ namespace DapperSqlGenerator.App.Generator.Services
                  /// <summary>
                  /// Get paginated {entityClassName}
                  /// </summary>
-                 public async Task<PagedResults<{entityClassName}>> GetAllPaginatedAsync(int page=1, int pageSize=10)
+                 public async Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>> whereExpression, Expression<Func<{entityClassName}, object>> orderByExpression, int page=1, int pageSize=10)
                  {{ 
                       PagedResults<{entityClassName}> result = null;
                       try
                       {{
-                         result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetAllPaginatedAsync(page,pageSize)
+                         result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetAllPaginatedAsync(whereExpression,orderByExpression,page,pageSize);
                       }}
                     catch (Exception ex)
                     {{
@@ -346,7 +346,7 @@ namespace DapperSqlGenerator.App.Generator.Services
                 yield return $"Task<IEnumerable<{entityClassName}>> GetAllAsync();";
 
             //Get Paginated Entities
-            yield return $"Task<PagedResults<{entityClassName}>> GetAllPaginatedAsync(int page=1, int pageSize=10);";
+            yield return $"Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>> whereExpression, Expression<Func<{entityClassName}, object>> orderByExpression, int page=1, int pageSize=10);";
 
             //Get by Primary key
             yield return $"Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";

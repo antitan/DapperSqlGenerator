@@ -118,7 +118,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             yield return $"Task<IEnumerable<{entityClassName}>> GetAllAsync();";
 
             //Get Paginated Entities
-            yield return $"Task<PagedResults<{entityClassName}>> GetAllPaginatedAsync(int page=1, int pageSize=10);";
+            yield return $"Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>> whereExpression, Expression<Func<{entityClassName}, object>> orderByExpression, int page=1, int pageSize=10);";
 
             //Get by Primary key
             yield return $"Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";
@@ -156,7 +156,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             yield return repositoryMethodsGenerator.GenerateGetAllMethod();
             yield return repositoryMethodsGenerator.GenerateGetByPKMethod();
             yield return repositoryMethodsGenerator.GenerateGetByExpressionMethod();
-            yield return repositoryMethodsGenerator.GenerateGetAllPaginatedMethod();
+            yield return repositoryMethodsGenerator.GenerateGePaginatedMethod();
             yield return "#endregion Generated";
         }
 

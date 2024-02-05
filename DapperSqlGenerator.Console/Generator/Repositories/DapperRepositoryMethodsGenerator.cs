@@ -105,8 +105,28 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         #endregion Delete
 
-        private string BuildSelectTableFileds(string whereClause = null)
+
+        private string BuildSelectFromTable(string selection,string whereClause = null, string orderClause = null)
+        { 
+            string  query = $"SELECT {selection} FROM {table.Name} ";
+            if (whereClause != null)
+            {
+                query += $" WHERE {whereClause} ";
+            }
+            if (orderClause != null)
+            {
+                query += $" ORDER BY {orderClause} ";
+            }
+            return query;
+        }
+
+        private string BuildSelectCountTableFileds(string whereClause = null, string orderClause = null)
         {
+            return BuildSelectFromTable(" COUNT (*) ", whereClause, orderClause);
+        }
+        private string BuildSelectTableFileds(string whereClause = null, string orderClause = null)
+        {
+
             string query = string.Empty;
             var allColumns = table.GetAllColumns();
             var select_columns = String.Join(", ",
@@ -116,25 +136,20 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                    return $"[{colName}]";
                }));
 
-            query = $"SELECT {select_columns} FROM {table.Name} ";
-            if(whereClause != null)
-            {
-                query += " WHERE " + whereClause;
-            }
-            return query;
+            return BuildSelectFromTable($" {select_columns} ", whereClause, orderClause);
         }
 
 
         #region GetByExpression Method
 
-        private string BuildGetByExpressioQuery()
+        private string BuildGetByExpressionQuery()
         {
-            return BuildSelectTableFileds(" {criteria.ToMSSqlString()} ");
+            return BuildSelectTableFileds(" criteria.ToMSSqlString() ");
         }
 
         public string GenerateGetByExpressionMethod()
         {
-            string query = BuildGetByExpressioQuery();
+            string query = BuildGetByExpressionQuery();
             var entityClassName = table.Name.Parts[1];
             string output = $@"
                 /// <summary>
@@ -154,29 +169,51 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         #endregion GetByExpression Method
 
-        #region GetByExpression Method 
+        #region GetPaginated Method 
 
-        private string BuildGetAllPaginatedQuery()
+
+        
+        private string BuildCountPaginatedQuery()
         {
-            return string.Empty;
+            var query = BuildSelectCountTableFileds($" {{whereExpression.ToMSSqlString()}}  ", $" {{orderByExpression.ToMSSqlString()}} ");
+            return query;
+        }
+        private string BuildGetPaginatedQuery()
+        {
+           var query =  BuildSelectTableFileds($" {{whereExpression.ToMSSqlString()}} ", $" {{orderByExpression.ToMSSqlString()}} ");
+            query += " OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+           return query;
         }
 
-        public string GenerateGetAllPaginatedMethod()
+        public string GenerateGePaginatedMethod()
         {
-        https://www.davepaquette.com/archive/2019/01/28/paging-large-result-sets-with-dapper-and-sql-server.aspx
-            string query = BuildGetAllPaginatedQuery();
+            //https://www.davepaquette.com/archive/2019/01/28/paging-large-result-sets-with-dapper-and-sql-server.aspx
+            string selectQuery = BuildGetPaginatedQuery();
+            string selectCountQuery = BuildCountPaginatedQuery(); 
             var entityClassName = table.Name.Parts[1];
             string output = $@"
                 /// <summary>
                 /// Get paginated {entityClassName}
                 /// </summary>
-                public async Task<PagedResults<{entityClassName}>> GetAllPaginatedAsync(int page=1, int pageSize=10)
+                public async Task<PagedResults<{entityClassName}>> GetPaginatedAsync( Expression<Func<{entityClassName}, bool>> whereExpression, Expression<Func<{entityClassName}, object>> orderByExpression, int page=1, int pageSize=10)
                 {{
+                    var results = new PagedResults<{entityClassName}>();
+                    
                     using (var connection = new SqlConnection(connectionString))
                     {{
-                        var entities = await connection.QueryAsync<{entityClassName}>(""{query}"");
-                        return entities;
+                        await connection.OpenAsync();
+                        var querySelect = $""{selectQuery}"";
+                        var queryCount = $""{selectCountQuery}"";
+                        var query = $""{{querySelect}} {{queryCount}} "";
+                        using (var multi = await connection.QueryMultipleAsync(query,
+                            new {{ Offset = (page - 1) * pageSize,
+                                  PageSize = pageSize }}))
+                        {{
+                             results.Items = multi.Read<{entityClassName}>();
+                             results.TotalCount = multi.ReadFirst<int>();
+                        }} 
                     }}
+                    return results;
                 }}";
 
             return output;

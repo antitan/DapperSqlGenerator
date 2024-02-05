@@ -36,7 +36,7 @@ namespace DapperSqlGenerator.App
 
             //if includeOnlyTables is not empty , let excludedTables empty it will be computed afted
             //else if includeOnlyTables is empty , you can fill excludedTables
-            string[] includeOnlyTables = {  };
+            string[] includeOnlyTables = { "Cv" };
             //excludes table we don't want ot generate
             //string[] excludedTables = {  };
             string[] excludedTables = { "EFMigrationsHistory", "AspNetRoleClaims", "AspNetRoles", "AspNetUserClaims", "AspNetUserLogins", "AspNetUserRoles", "AspNetUsers", "AspNetUserTokens" };
@@ -58,12 +58,12 @@ namespace DapperSqlGenerator.App
              
 
             List<IGeneratorService> generatorServices = new List<IGeneratorService>();
-            //generatorServices.Add( new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables));
-            //generatorServices.Add( new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir,projectName, excludedTables));
-            //generatorServices.Add(new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataRepostioryNamespace, dataServiceDir,projectName, excludedTables, refTables));
-            //generatorServices.Add(new CopyUtilitiesFilesService(projectName,cacheServiceDir,configurationDir,helpersDir));
-            //generatorServices.Add(new FileCustomerService(projectName,registerServiceExtensionDir,constantsDir, excludedTables, refTables));
-            generatorServices.Add(new StoredProcedureGeneratorService(projectName,dataRepostioryNamespace, spDir));
+            generatorServices.Add(new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables));
+            generatorServices.Add(new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, projectName, excludedTables));
+            generatorServices.Add(new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataRepostioryNamespace, dataServiceDir, projectName, excludedTables, refTables));
+            generatorServices.Add(new CopyUtilitiesFilesService(projectName, cacheServiceDir, configurationDir, helpersDir));
+            generatorServices.Add(new FileCustomerService(projectName, registerServiceExtensionDir, constantsDir, excludedTables, refTables));
+            generatorServices.Add(new StoredProcedureGeneratorService(projectName, dataRepostioryNamespace, spDir));
 
             //await new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables).GenerateFilesAsync(model);
             //await new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, projectName,excludedTables).GenerateFilesAsync(model);
