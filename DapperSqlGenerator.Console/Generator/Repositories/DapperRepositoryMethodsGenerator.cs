@@ -3,6 +3,8 @@ using DapperSqlGenerator.App.Extenions;
 using DapperSqlGenerator.App.Helpers;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using System.Reflection;
+using System.Reflection.Metadata;
 
 namespace DapperSqlGenerator.App.Generator.Repositories
 {
@@ -126,6 +128,17 @@ namespace DapperSqlGenerator.App.Generator.Repositories
        
         private string BuildSelectTableFileds(string whereClause = null, string orderClause = null)
         {
+
+            //var objs = table.GetReferencing().ToList();
+            //foreach(var o in objs)
+            //{
+            //    var ch = o.GetChildren().ToList();
+            //    foreach(var c in ch)
+            //    {
+            //          var tttt= c.GetChildren().ToList(); 
+            //    }
+            //}
+
 
             string query = string.Empty;
             var allColumns = table.GetAllColumns();
