@@ -4,5 +4,17 @@
     {
         public IEnumerable<T> Items { get; set; }
         public int TotalCount { get; set; }
+        public int PageIndex { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPageNumber 
+        { 
+            get
+            {
+                int total=0;
+                if(PageSize != 0)
+                total = TotalCount/PageSize;
+                return total;
+            }
+        }
     }
 }

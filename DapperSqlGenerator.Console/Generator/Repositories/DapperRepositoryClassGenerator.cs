@@ -118,7 +118,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             yield return $"Task<IEnumerable<{entityClassName}>> GetAllAsync();";
 
             //Get Paginated Entities
-            yield return $"Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>> whereExpression, Expression<Func<{entityClassName}, object>> orderByExpression, int page=1, int pageSize=10);";
+            yield return $"Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>>? criteria=null, Expression<Func<{entityClassName}, object>>? orderByExpression=null, int page=1, int pageSize=10);";
 
             //Get by Primary key
             yield return $"Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";

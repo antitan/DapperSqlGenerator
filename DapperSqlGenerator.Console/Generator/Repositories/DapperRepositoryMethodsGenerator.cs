@@ -1,7 +1,8 @@
 ﻿
 using DapperSqlGenerator.App.Extenions;
 using DapperSqlGenerator.App.Helpers;
-using Microsoft.SqlServer.Dac.Model; 
+using Microsoft.SqlServer.Dac.Model;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DapperSqlGenerator.App.Generator.Repositories
 {
@@ -106,7 +107,9 @@ namespace DapperSqlGenerator.App.Generator.Repositories
         #endregion Delete
 
 
-        private string BuildSelectFromTable(string selection,string whereClause = null, string orderClause = null)
+       
+
+        private string BuildSelectFromTableWhereAndOrderBy(string selection,string? whereClause = null, string orderClause = null)
         { 
             string  query = $"SELECT {selection} FROM {table.Name} ";
             if (whereClause != null)
@@ -120,10 +123,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             return query;
         }
 
-        private string BuildSelectCountTableFileds(string whereClause = null, string orderClause = null)
-        {
-            return BuildSelectFromTable(" COUNT (*) ", whereClause, orderClause);
-        }
+       
         private string BuildSelectTableFileds(string whereClause = null, string orderClause = null)
         {
 
@@ -136,7 +136,56 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                    return $"[{colName}]";
                }));
 
-            return BuildSelectFromTable($" {select_columns} ", whereClause, orderClause);
+            return BuildSelectFromTableWhereAndOrderBy($" {select_columns} ", whereClause, orderClause);
+        }
+
+
+        private string BuildWhere(string expressionVariableToTest, string queryToConcat)
+        {
+            string where = $@"if( criteria != null )  {Environment.NewLine}";
+            where += "{ "+ Environment.NewLine;
+            where += $@"{queryToConcat} += $"" WHERE {{ {expressionVariableToTest}.ToMSSqlString() }} ""; ";
+            where += "} " + Environment.NewLine;
+
+            return where;
+        }
+
+        private string BuildOrderBy(string expressionVariableToTest, string queryToConcat)
+        {
+            string orderby = $" var orderComputedExpression = (orderByExpression == null)?\"1\":{expressionVariableToTest}.ToMSSqlString();" + Environment.NewLine;
+            orderby += $@"{queryToConcat} += $"" ORDER BY {{orderComputedExpression}}  " +"\";"+ Environment.NewLine;
+            return orderby;
+        }
+
+        private string BuildOffset( string queryToConcat)
+        { 
+            //pour le offset le order by est obligatoire !
+            return $@"{queryToConcat} += $"" OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;"" ;"+Environment.NewLine;
+        }
+
+        private string BuildSelectCountFromTable()
+        { 
+            return BuildSelectColumnsFromTable(" count(*) ");
+        }
+
+        private string BuildSelectColumnsFromTable()
+        {
+
+            string query = string.Empty;
+            var allColumns = table.GetAllColumns();
+            var select_columns = String.Join(", ",
+               allColumns.Select(col =>
+               {
+                   var colName = col.Name.Parts[2];
+                   return $"[{colName}]";
+               }));
+
+            return BuildSelectColumnsFromTable(select_columns);
+        }
+
+        private string BuildSelectColumnsFromTable(string selection)
+        {
+             return $"SELECT {selection} FROM {table.Name} \";  {Environment.NewLine}";
         }
 
 
@@ -144,12 +193,14 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         private string BuildGetByExpressionQuery()
         {
-            return BuildSelectTableFileds(" criteria.ToMSSqlString() ");
+            var query = BuildSelectColumnsFromTable();
+            query += BuildWhere("criteria","querySelect");
+            return query;
         }
 
         public string GenerateGetByExpressionMethod()
         {
-            string query = BuildGetByExpressionQuery();
+            string querySelect = BuildGetByExpressionQuery();
             var entityClassName = table.Name.Parts[1];
             string output = $@"
                 /// <summary>
@@ -159,7 +210,8 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                 {{
                     using (var connection = new SqlConnection(connectionString))
                     {{ 
-                        var entities = await connection.QueryAsync<{entityClassName}>($""{query}"");
+                        var querySelect = $""{querySelect}
+                        var entities = await connection.QueryAsync<{entityClassName}>(querySelect);
                         return entities;
                     }}
                 }}";
@@ -175,13 +227,19 @@ namespace DapperSqlGenerator.App.Generator.Repositories
         
         private string BuildCountPaginatedQuery()
         {
-            var query = BuildSelectCountTableFileds($" {{whereExpression.ToMSSqlString()}}  ", $" {{orderByExpression.ToMSSqlString()}} ");
+            var query = BuildSelectCountFromTable();
+            query += BuildWhere("criteria", "queryCount");
             return query;
         }
+
+
+
         private string BuildGetPaginatedQuery()
         {
-           var query =  BuildSelectTableFileds($" {{whereExpression.ToMSSqlString()}} ", $" {{orderByExpression.ToMSSqlString()}} ");
-            query += " OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+            var query = BuildSelectColumnsFromTable();
+            query += BuildWhere("criteria","querySelect");
+            query += BuildOrderBy("orderByExpression", "querySelect");
+            query += BuildOffset("querySelect");
            return query;
         }
 
@@ -195,15 +253,15 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                 /// <summary>
                 /// Get paginated {entityClassName}
                 /// </summary>
-                public async Task<PagedResults<{entityClassName}>> GetPaginatedAsync( Expression<Func<{entityClassName}, bool>> whereExpression, Expression<Func<{entityClassName}, object>> orderByExpression, int page=1, int pageSize=10)
+                public async Task<PagedResults<{entityClassName}>> GetPaginatedAsync( Expression<Func<{entityClassName}, bool>>? criteria, Expression<Func<{entityClassName}, object>>? orderByExpression=null, int page=1, int pageSize=10)
                 {{
                     var results = new PagedResults<{entityClassName}>();
                     
                     using (var connection = new SqlConnection(connectionString))
                     {{
                         await connection.OpenAsync();
-                        var querySelect = $""{selectQuery}"";
-                        var queryCount = $""{selectCountQuery}"";
+                        var querySelect = $""{selectQuery}
+                        var queryCount = $""{selectCountQuery}
                         var query = $""{{querySelect}} {{queryCount}} "";
                         using (var multi = await connection.QueryMultipleAsync(query,
                             new {{ Offset = (page - 1) * pageSize,
@@ -211,6 +269,8 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                         {{
                              results.Items = multi.Read<{entityClassName}>();
                              results.TotalCount = multi.ReadFirst<int>();
+                             results.PageIndex = page;
+                             results.PageSize = pageSize; 
                         }} 
                     }}
                     return results;
