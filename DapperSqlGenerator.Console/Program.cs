@@ -33,10 +33,16 @@ namespace DapperSqlGenerator.App
 
 
             spDir = constantsDir = helpersDir = registerServiceExtensionDir = configurationDir = cacheServiceDir = dataServiceDir = dataRepositoryDir = dataModelDir = @"C:\proj_net\testGenerator\ConsoleApp1";
+            dataModelDir = "C:\\proj_net\\SmartCv\\backend\\SmartCv.Business\\Domain\\cv";
+            dataRepositoryDir = "C:\\proj_net\\SmartCv\\backend\\SmartCv.Repository\\cv";
+            dataServiceDir = "C:\\proj_net\\SmartCv\\backend\\SmartCv.Services\\Data\\cv";
+
+
+
 
             //if includeOnlyTables is not empty , let excludedTables empty it will be computed afted
             //else if includeOnlyTables is empty , you can fill excludedTables
-            string[] includeOnlyTables = { "CvDocument", "JobDocument" };
+            string[] includeOnlyTables = { "CvDocument"/*, "JobDocument"*/ };
             //excludes table we don't want ot generate
             //string[] excludedTables = {  };
             string[] excludedTables = { "EFMigrationsHistory", "AspNetRoleClaims", "AspNetRoles", "AspNetUserClaims", "AspNetUserLogins", "AspNetUserRoles", "AspNetUsers", "AspNetUserTokens" };

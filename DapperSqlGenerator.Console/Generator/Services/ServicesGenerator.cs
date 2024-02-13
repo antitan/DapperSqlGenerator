@@ -239,9 +239,9 @@ namespace DapperSqlGenerator.App.Generator.Services
             /// <summary>
             /// Insert {entityClassName}
             /// </summary>
-            public async  Task<{returnType}?> InsertAsync({entityClassName} {paramName})
+            public async  Task<{returnType}> InsertAsync({entityClassName} {paramName})
             {{
-                {returnType}? result = ({returnType})ReflexionHelper.GetDefaultValue(typeof({returnType}));
+                {returnType} result = ({returnType})ReflexionHelper.GetDefaultValue(typeof({returnType}));
                 try
                 {{
                     result = await {Common.FirstCharacterToLower(entityClassName)}Repository.InsertAsync({paramName}); 
@@ -354,7 +354,7 @@ namespace DapperSqlGenerator.App.Generator.Services
             yield return $"Task<IEnumerable<{entityClassName}>?> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);";
 
             //Insert
-            yield return $"Task<{returnType}?> InsertAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
+            yield return $"Task<{returnType}> InsertAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
 
             //Update
             yield return $"Task UpdateAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
