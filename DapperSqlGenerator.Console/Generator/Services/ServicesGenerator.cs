@@ -128,9 +128,9 @@ namespace DapperSqlGenerator.App.Generator.Services
                 /// <summary>
                 /// Get {entityClassName} by Expression
                 /// </summary>
-                public async Task<IEnumerable<{entityClassName}>> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
+                public async Task<IEnumerable<{entityClassName}>?> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
                 {{
-                    IEnumerable<{entityClassName}> result=null;
+                    IEnumerable<{entityClassName}>? result=null;
                     try
                     {{
                         result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetByExpressionAsync(criteria);
@@ -155,9 +155,9 @@ namespace DapperSqlGenerator.App.Generator.Services
                 /// <summary>
                 /// Get {entityClassName} by PK
                 /// </summary>
-                public async Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
+                public async Task<{entityClassName}?> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
                 {{
-                    {entityClassName} result = null;
+                    {entityClassName}? result = null;
                     try
                     {{
                         result = await {Common.FirstCharacterToLower(entityClassName)}Repository.GetBy{pkFieldsNames}Async({pkFieldsWithComma});
@@ -201,9 +201,9 @@ namespace DapperSqlGenerator.App.Generator.Services
                  /// <summary>
                  /// Get all {entityClassName}
                  /// </summary>
-                 public async Task<IEnumerable<{entityClassName}>> GetAllAsync()
+                 public async Task<IEnumerable<{entityClassName}>?> GetAllAsync()
                  {{ 
-                      IEnumerable<{entityClassName}> result = null;
+                      IEnumerable<{entityClassName}>? result = null;
                       try
                       {{
                          if (!cacheManager.IsSet(CacheDataConstants.{entityClassName}AllCacheKey))
@@ -239,9 +239,9 @@ namespace DapperSqlGenerator.App.Generator.Services
             /// <summary>
             /// Insert {entityClassName}
             /// </summary>
-            public async  Task<{returnType}> InsertAsync({entityClassName} {paramName})
+            public async  Task<{returnType}?> InsertAsync({entityClassName} {paramName})
             {{
-                {returnType} result = ({returnType})ReflexionHelper.GetDefaultValue(typeof({returnType}));
+                {returnType}? result = ({returnType})ReflexionHelper.GetDefaultValue(typeof({returnType}));
                 try
                 {{
                     result = await {Common.FirstCharacterToLower(entityClassName)}Repository.InsertAsync({paramName}); 
@@ -342,19 +342,19 @@ namespace DapperSqlGenerator.App.Generator.Services
             bool isRefTable = refTables.Contains(entityClassName);
             //Get all
             if(isRefTable)
-                yield return $"Task<IEnumerable<{entityClassName}>> GetAllAsync();";
+                yield return $"Task<IEnumerable<{entityClassName}>?> GetAllAsync();";
 
             //Get Paginated Entities
             yield return $"Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>>? criteria=null, Expression<Func<{entityClassName}, object>>? orderByExpression=null, int page=1, int pageSize=10);";
 
             //Get by Primary key
-            yield return $"Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";
+            yield return $"Task<{entityClassName}?> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";
 
             //Get by Expression
-            yield return $"Task<IEnumerable<{entityClassName}>> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);";
+            yield return $"Task<IEnumerable<{entityClassName}>?> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);";
 
             //Insert
-            yield return $"Task<{returnType}> InsertAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
+            yield return $"Task<{returnType}?> InsertAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
 
             //Update
             yield return $"Task UpdateAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";

@@ -36,7 +36,7 @@ namespace DapperSqlGenerator.App
 
             //if includeOnlyTables is not empty , let excludedTables empty it will be computed afted
             //else if includeOnlyTables is empty , you can fill excludedTables
-            string[] includeOnlyTables = { "CvSkillExperienceMapping" };
+            string[] includeOnlyTables = { "CvDocument", "JobDocument" };
             //excludes table we don't want ot generate
             //string[] excludedTables = {  };
             string[] excludedTables = { "EFMigrationsHistory", "AspNetRoleClaims", "AspNetRoles", "AspNetUserClaims", "AspNetUserLogins", "AspNetUserRoles", "AspNetUsers", "AspNetUserTokens" };

@@ -128,18 +128,6 @@ namespace DapperSqlGenerator.App.Generator.Repositories
        
         private string BuildSelectTableFileds(string whereClause = null, string orderClause = null)
         {
-
-            //var objs = table.GetReferencing().ToList();
-            //foreach(var o in objs)
-            //{
-            //    var ch = o.GetChildren().ToList();
-            //    foreach(var c in ch)
-            //    {
-            //          var tttt= c.GetChildren().ToList(); 
-            //    }
-            //}
-
-
             string query = string.Empty;
             var allColumns = table.GetAllColumns();
             var select_columns = String.Join(", ",
@@ -219,7 +207,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                 /// <summary>
                 /// Get {entityClassName} by expression 
                 /// </summary>
-                public async Task<IEnumerable<{entityClassName}>> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
+                public async Task<IEnumerable<{entityClassName}>?> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
                 {{
                     using (var connection = new SqlConnection(connectionString))
                     {{ 
@@ -309,7 +297,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                 /// <summary>
                 /// Get all {entityClassName}
                 /// </summary>
-                public async Task<IEnumerable<{entityClassName}>> GetAllAsync()
+                public async Task<IEnumerable<{entityClassName}>?> GetAllAsync()
                 {{
                     using (var connection = new SqlConnection(connectionString))
                     {{
@@ -370,7 +358,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                 /// <summary>
                 /// Get {entityClassName} by PK
                 /// </summary>
-                public async Task<{entityClassName}> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
+                public async Task<{entityClassName}?> GetBy{pkFieldsNames}Async({pkFieldsWithTypes})
                 {{
                     using (var connection = new SqlConnection(connectionString))
                     {{
