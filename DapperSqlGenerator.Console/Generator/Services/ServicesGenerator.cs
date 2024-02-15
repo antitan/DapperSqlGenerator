@@ -54,7 +54,14 @@ namespace DapperSqlGenerator.App.Generator.Services
             var entityClassName = table.Name.Parts[1];
             var repoClassName = entityClassName + "Service";
             var repoInterfaceName = "I" + repoClassName;
-            var methodDeclarations = String.Join(Environment.NewLine + "        ", GenerateClassMethods());
+
+            string methodDeclarationGeneratedOutput = string.Empty;
+            var methodDeclarationGenerated = GenerateClassMethods();
+            foreach (var methodDeclaration in methodDeclarationGenerated)
+            {
+                if (methodDeclaration != String.Empty)
+                    methodDeclarationGeneratedOutput += methodDeclaration + Environment.NewLine;
+            }
 
             string output =
             $@"  
@@ -71,7 +78,7 @@ namespace DapperSqlGenerator.App.Generator.Services
                          this.logger = logger;
                     }}
         
-                    {methodDeclarations}
+                    {methodDeclarationGeneratedOutput}
 
                 }}
             ";
@@ -319,6 +326,7 @@ namespace DapperSqlGenerator.App.Generator.Services
             var methodDeclarationGenerated = GenerateInterfaceMethods();
             foreach( var methodDeclaration in methodDeclarationGenerated) 
             {
+                if(methodDeclaration != String.Empty)
                 methodDeclarationGeneratedOutput += methodDeclaration+ Environment.NewLine;
             } 
 

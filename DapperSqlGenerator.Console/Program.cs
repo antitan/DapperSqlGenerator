@@ -10,49 +10,69 @@ namespace DapperSqlGenerator.App
     {
         static async Task Main(string[] args)
         {
-            string projectName = "SmartCv";
+            string projectName = "MyProject";
             string connectionString = "Data Source=localhost;Initial Catalog=SmartCv;Integrated Security=True;Persist Security Info=False;Trust Server Certificate=True;";
-             
+
+            string csProjPath = @"C:\proj_net\testGenerator\ConsoleApp1";
+
             //directories where files are created
-            string dataModelDir = @"C:\Temp\Data";
-            if (!Directory.Exists(dataModelDir)) Directory.CreateDirectory(dataModelDir);
-            string dataRepositoryDir = @"C:\Temp\Repositories";
-            if (!Directory.Exists(dataRepositoryDir)) Directory.CreateDirectory(dataRepositoryDir);
-            string dataServiceDir = @"C:\Temp\Services";
-            if (!Directory.Exists(dataServiceDir)) Directory.CreateDirectory(dataServiceDir);
-            string cacheServiceDir = @"C:\Temp\Cache";
-            if (!Directory.Exists(cacheServiceDir)) Directory.CreateDirectory(cacheServiceDir);
-            string configurationDir = @"C:\Temp\Configuration";
-            if (!Directory.Exists(configurationDir)) Directory.CreateDirectory(configurationDir);
-            string registerServiceExtensionDir = @"C:\Temp\Extensions";
-            if (!Directory.Exists(registerServiceExtensionDir)) Directory.CreateDirectory(registerServiceExtensionDir);
-            string helpersDir = @"C:\Temp\Helpers";
-            if (!Directory.Exists(helpersDir)) Directory.CreateDirectory(helpersDir);
-            string constantsDir = @"C:\Temp\Constants";
-            if (!Directory.Exists(constantsDir)) Directory.CreateDirectory(constantsDir);
-            string spDir = @"C:\Temp\StoredProcedures";
-            if (!Directory.Exists(spDir)) Directory.CreateDirectory(spDir);
+            string dataModelDir = Path.Combine(csProjPath, $"{projectName}.Business" ,"DataModel");
+            if (!Directory.Exists(dataModelDir)) 
+                Directory.CreateDirectory(dataModelDir);
+
+            string cacheServiceDir = Path.Combine(csProjPath, $"{projectName}.Common", "Cache");
+            if (!Directory.Exists(cacheServiceDir))
+                Directory.CreateDirectory(cacheServiceDir);
+
+            string configurationDir = Path.Combine(csProjPath, $"{projectName}.Common", "Configuration");
+            if (!Directory.Exists(configurationDir))
+                Directory.CreateDirectory(configurationDir);
+
+            string helpersDir = Path.Combine(csProjPath, $"{projectName}.Common", "Helpers");
+            if (!Directory.Exists(helpersDir))
+                Directory.CreateDirectory(helpersDir);
+
+            string constantsDir = Path.Combine(csProjPath, $"{projectName}.Common", "Constants");
+            if (!Directory.Exists(constantsDir))
+                Directory.CreateDirectory(constantsDir);
 
 
-            spDir = constantsDir = helpersDir = registerServiceExtensionDir = configurationDir = cacheServiceDir = dataServiceDir = dataRepositoryDir = dataModelDir = @"C:\proj_net\testGenerator\ConsoleApp1";
+            string dataRepositoryDir = Path.Combine(csProjPath, $"{projectName}.Repositories");  
+            if (!Directory.Exists(dataRepositoryDir)) 
+                Directory.CreateDirectory(dataRepositoryDir);
+            
+            string dataServiceDir = Path.Combine(csProjPath, $"{projectName}.Services"); 
+            if (!Directory.Exists(dataServiceDir)) 
+                Directory.CreateDirectory(dataServiceDir);
+
+            
+            string registerServiceExtensionDir = Path.Combine(csProjPath, "Extensions");  
+            if (!Directory.Exists(registerServiceExtensionDir)) 
+                Directory.CreateDirectory(registerServiceExtensionDir);
+            
+          
+            
+            string spDir = Path.Combine(csProjPath, $"{projectName}.Repositories","StoredProcedures"); 
+            if (!Directory.Exists(spDir)) 
+                Directory.CreateDirectory(spDir);
 
             //Choice of methods to generate
             MethodsToGenerate.Check = new Dictionary<string,bool>()
             {
-                {MethodNameToGenerate.GetAllAsync, false},
-                {MethodNameToGenerate.GetPaginatedAsync, false},
-                {MethodNameToGenerate.GetByPkFieldsNamesAsync, false},
-                {MethodNameToGenerate.GetByExpressionAsync, false},
-                 {MethodNameToGenerate.DeleteByExpressionAsync, false},
+                {MethodNameToGenerate.GetAllAsync, true},
+                {MethodNameToGenerate.GetPaginatedAsync, true},
+                {MethodNameToGenerate.GetByPkFieldsNamesAsync, true},
+                {MethodNameToGenerate.GetByExpressionAsync, true},
+                {MethodNameToGenerate.DeleteByExpressionAsync, true},
 
                 {MethodNameToGenerate.InsertAsync, true},
                 {MethodNameToGenerate.UpdateAsync, true},
                 {MethodNameToGenerate.DeleteByPkFieldsNamesAsync, true},
                
                 //method if you need to operate inside transaction
-                {MethodNameToGenerate.InsertAsyncTransaction, false},
-                {MethodNameToGenerate.UpdateAsyncTransaction, false},
-                {MethodNameToGenerate.DeleteByPkFieldsNamesAsyncTransaction, false}
+                {MethodNameToGenerate.InsertAsyncTransaction, true},
+                {MethodNameToGenerate.UpdateAsyncTransaction, true},
+                {MethodNameToGenerate.DeleteByPkFieldsNamesAsyncTransaction, true}
             };
 
             //if includeOnlyTables is not empty , let excludedTables empty it will be computed afted
@@ -66,7 +86,7 @@ namespace DapperSqlGenerator.App
             //For these tables, GetAllAsync is genereated and cache is used inside the service
             string[] refTables = { "Certification", "CountryCompany", "Department", "Lang" , "JobOfferLevel" };
 
-            string dataModelNamespace       = $"{projectName}.Model";
+            string dataModelNamespace       = $"{projectName}.Business.DataModel";
             string dataRepostioryNamespace  = $"{projectName}.Repositories";
             string dataServiceNamespace     = $"{projectName}.Services";
 
@@ -78,7 +98,6 @@ namespace DapperSqlGenerator.App
                 excludedTables = alltables.Except(includeOnlyTables).ToArray();
             }
              
-
             List<IGeneratorService> generatorServices = new List<IGeneratorService>();
             //generate model classes
             generatorServices.Add(new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables));

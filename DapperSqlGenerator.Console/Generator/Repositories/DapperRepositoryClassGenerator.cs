@@ -53,7 +53,14 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             var entityClassName = table.Name.Parts[1];
             var repoClassName = entityClassName + "Repository";
             var repoInterfaceName = "I" + repoClassName;
-            var methodDeclarations = String.Join(Environment.NewLine + "        ", GenerateClassMethods());
+
+            string methodDeclarationGeneratedOutput = string.Empty;
+            var methodDeclarationGenerated = GenerateClassMethods();
+            foreach (var methodDeclaration in methodDeclarationGenerated)
+            {
+                if (methodDeclaration != String.Empty)
+                    methodDeclarationGeneratedOutput += methodDeclaration + Environment.NewLine;
+            }
 
             string output =
             $@"  
@@ -67,7 +74,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                         connectionString = connectionsStringsOptions.Value.DefaultConnection;
                     }}
         
-                    {methodDeclarations}
+                    {methodDeclarationGeneratedOutput}
 
                 }}
             ";
@@ -85,12 +92,18 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             var repoClassName = entityClassName + "Repository";
             var repoInterfaceName = "I" + repoClassName;
 
-            var methodDeclarations = String.Join(Environment.NewLine + "        ",GenerateInterfaceMethods());
+            string methodDeclarationGeneratedOutput = string.Empty;
+            var methodDeclarationGenerated = GenerateInterfaceMethods();
+            foreach (var methodDeclaration in methodDeclarationGenerated)
+            {
+                if (methodDeclaration != String.Empty)
+                    methodDeclarationGeneratedOutput += methodDeclaration + Environment.NewLine;
+            }
 
             string output =
             $@" public partial interface {repoInterfaceName}
                 {{ 
-                    {methodDeclarations}
+                    {methodDeclarationGeneratedOutput}
                 }}";
 
             return output;
