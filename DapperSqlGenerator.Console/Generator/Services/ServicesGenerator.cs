@@ -1,5 +1,6 @@
 ﻿using DapperSqlGenerator.App.Extenions;
-using DapperSqlGenerator.App.Helpers; 
+using DapperSqlGenerator.App.Helpers;
+using DapperSqlGenerator.App.Models;
 using Microsoft.SqlServer.Dac.Model;
 
 namespace DapperSqlGenerator.App.Generator.Services
@@ -99,8 +100,7 @@ namespace DapperSqlGenerator.App.Generator.Services
 
         private string GenerateDeleteByExpressionDelegate(string entityClassName)
         {
-            var pkFieldsNames = Common.ConcatPkFieldNames(table);
-
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync]) return string.Empty;
             string output = $@"
                 /// <summary>
                 /// Delete {entityClassName} by Expression
@@ -122,8 +122,7 @@ namespace DapperSqlGenerator.App.Generator.Services
 
         private string GenerateGetByExpressionDelegate(string entityClassName)
         {
-            var pkFieldsNames = Common.ConcatPkFieldNames(table);
-
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetByExpressionAsync]) return string.Empty;
             string output = $@"
                 /// <summary>
                 /// Get {entityClassName} by Expression
@@ -146,7 +145,8 @@ namespace DapperSqlGenerator.App.Generator.Services
         }
 
         private string GenerateGetByPkDelegate(string entityClassName)
-        {  
+        {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetByPkFieldsNamesAsync]) return string.Empty;
             var pkFieldsNames = Common.ConcatPkFieldNames(table);
             var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table); 
             var pkFieldsWithComma = Common.ConcatPkFieldsWithComma(table);
@@ -174,6 +174,7 @@ namespace DapperSqlGenerator.App.Generator.Services
         
         private string GenerateGetAllPaginatedDelegate(string entityClassName)
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetPaginatedAsync]) return string.Empty;
             string output = $@"
                  /// <summary>
                  /// Get paginated {entityClassName}
@@ -197,6 +198,7 @@ namespace DapperSqlGenerator.App.Generator.Services
 
         private string GenerateGetAllRefDelegate(string entityClassName)
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetAllAsync]) return string.Empty;
             string output = $@"
                  /// <summary>
                  /// Get all {entityClassName}
@@ -226,6 +228,7 @@ namespace DapperSqlGenerator.App.Generator.Services
 
         private string GenerateInsertDelegate(string entityClassName) 
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.InsertAsync]) return string.Empty;
             var pkColumns = table.GetPrimaryKeyColumns();
              //Exclude de PK identity field to put "Direction Output" in Dapper params
             bool isOneColumnIdentity = pkColumns.Count() == 1 && pkColumns.ToList()[0].IsColumnIdentity();
@@ -256,6 +259,7 @@ namespace DapperSqlGenerator.App.Generator.Services
 
         private string GenerateUpdateDelegate(string entityClassName)
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.UpdateAsync]) return string.Empty;
             var paramName = Common.FirstCharacterToLower(entityClassName);
             string output = $@"
             /// <summary>
@@ -277,6 +281,7 @@ namespace DapperSqlGenerator.App.Generator.Services
 
         private string GenerateDeleteDelegate(string entityClassName)
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByPkFieldsNamesAsync]) return string.Empty;
             var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table); 
             var pkFieldsNames = Common.ConcatPkFieldNames(table);
             var pkFieldsWithComma = Common.ConcatPkFieldsWithComma(table);
@@ -342,28 +347,28 @@ namespace DapperSqlGenerator.App.Generator.Services
             bool isRefTable = refTables.Contains(entityClassName);
             //Get all
             if(isRefTable)
-                yield return $"Task<IEnumerable<{entityClassName}>?> GetAllAsync();";
+                yield return (MethodsToGenerate.Check[MethodNameToGenerate.GetAllAsync]) ? $"Task<IEnumerable<{entityClassName}>?> GetAllAsync();":string.Empty;
 
             //Get Paginated Entities
-            yield return $"Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>>? criteria=null, Expression<Func<{entityClassName}, object>>? orderByExpression=null, int page=1, int pageSize=10);";
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.GetPaginatedAsync]) ? $"Task<PagedResults<{entityClassName}>> GetPaginatedAsync(Expression<Func<{entityClassName}, bool>>? criteria=null, Expression<Func<{entityClassName}, object>>? orderByExpression=null, int page=1, int pageSize=10);" : string.Empty;
 
             //Get by Primary key
-            yield return $"Task<{entityClassName}?> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});";
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.GetByPkFieldsNamesAsync]) ? $"Task<{entityClassName}?> GetBy{pkFieldsNames}Async({pkFieldsWithTypes});" : string.Empty;
 
             //Get by Expression
-            yield return $"Task<IEnumerable<{entityClassName}>?> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);";
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.GetByExpressionAsync]) ? $"Task<IEnumerable<{entityClassName}>?> GetByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);" : string.Empty;
 
             //Insert
-            yield return $"Task<{returnType}> InsertAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.InsertAsync]) ? $"Task<{returnType}> InsertAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});" : string.Empty;
 
             //Update
-            yield return $"Task UpdateAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});";
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.UpdateAsync]) ? $"Task UpdateAsync({entityClassName} {Common.FirstCharacterToLower(entityClassName)});":string.Empty;
 
             //Delete
-            yield return $"Task DeleteBy{pkFieldsNames}Async({pkFieldsWithTypes});";
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.DeleteByPkFieldsNamesAsync]) ? $"Task DeleteBy{pkFieldsNames}Async({pkFieldsWithTypes});":string.Empty;
 
             //DeleteAsync
-            yield return $"Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);";
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync])? $"Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);":string.Empty;
 
         }
     }

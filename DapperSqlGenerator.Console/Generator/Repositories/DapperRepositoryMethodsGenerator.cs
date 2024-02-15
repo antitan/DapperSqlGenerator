@@ -1,6 +1,7 @@
 ﻿
 using DapperSqlGenerator.App.Extenions;
 using DapperSqlGenerator.App.Helpers;
+using DapperSqlGenerator.App.Models;
 using Microsoft.SqlServer.Dac.Model;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using System.Reflection;
@@ -26,6 +27,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         public string GenerateDeleteByExpressionMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync]) return string.Empty;
             string query = BuildDeleteByExpressionQuery();
             var entityClassName = table.Name.Parts[1];
             string output = $@"
@@ -74,6 +76,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         public string GenerateDeleteMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByPkFieldsNamesAsync]) return string.Empty;
             string query = BuildDeleteQuery();
             var entityClassName = table.Name.Parts[1];
             var pkColumns = table.GetPrimaryKeyColumns();
@@ -111,7 +114,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
        
 
-        private string BuildSelectFromTableWhereAndOrderBy(string selection,string? whereClause = null, string orderClause = null)
+        private string BuildSelectFromTableWhereAndOrderBy(string selection,string? whereClause = null, string? orderClause = null)
         { 
             string  query = $"SELECT {selection} FROM {table.Name} ";
             if (whereClause != null)
@@ -126,7 +129,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
         }
 
        
-        private string BuildSelectTableFileds(string whereClause = null, string orderClause = null)
+        private string BuildSelectTableFileds(string? whereClause = null, string? orderClause = null)
         {
             string query = string.Empty;
             var allColumns = table.GetAllColumns();
@@ -201,6 +204,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         public string GenerateGetByExpressionMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetByExpressionAsync]) return string.Empty;
             string querySelect = BuildGetByExpressionQuery();
             var entityClassName = table.Name.Parts[1];
             string output = $@"
@@ -246,6 +250,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         public string GenerateGePaginatedMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetPaginatedAsync]) return string.Empty;
             //https://www.davepaquette.com/archive/2019/01/28/paging-large-result-sets-with-dapper-and-sql-server.aspx
             string selectQuery = BuildGetPaginatedQuery();
             string selectCountQuery = BuildCountPaginatedQuery(); 
@@ -291,6 +296,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         public string GenerateGetAllMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetAllAsync]) return string.Empty;
             string query = BuildGetAllQuery();
             var entityClassName = table.Name.Parts[1]; 
             string output = $@"
@@ -341,6 +347,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         public string GenerateGetByPKMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.GetByPkFieldsNamesAsync]) return string.Empty;
             string query = BuildGetByPKQuery();
             var pkColumns = table.GetPrimaryKeyColumns();
             var entityClassName = table.Name.Parts[1];
@@ -412,6 +419,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         public string GenerateInsertMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.InsertAsync]) return string.Empty;
             var pkColumns = table.GetPrimaryKeyColumns();
             var allColumns = table.GetAllColumns();
             //Exclude de PK identity field to put "Direction Output" in Dapper params
@@ -495,6 +503,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
         }
         public string GenerateUpdateMethod()
         {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.UpdateAsync]) return string.Empty;
             string query = BuildUpdateQuery();
             var entityClassName = table.Name.Parts[1];
             var allColumns = table.GetAllColumns();

@@ -103,7 +103,7 @@ namespace DapperSqlGenerator.App.Services
                         {
                             extractedRegionContentFromNewFile = ExtractGeneratedRegion(newCs);
                         }
-                        catch(RegionGeneratedNotFoundException ex)
+                        catch(RegionGeneratedNotFoundException)
                         {
                             warnings.Add(" Problem to extract Generated Section from generated Code, Generated Section not found");
                             hasWarning = true;
@@ -113,7 +113,7 @@ namespace DapperSqlGenerator.App.Services
                         {
                             extractedRegionContentFromExstingFile = ExtractGeneratedRegion(existingCs);
                         }
-                        catch (RegionGeneratedNotFoundException ex)
+                        catch (RegionGeneratedNotFoundException)
                         {
                             warnings.Add($" Problem to extract Generated Section from existing File {filePath}, Generated Section not found ");
                             hasWarning = true;
