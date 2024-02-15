@@ -102,7 +102,6 @@ namespace DapperSqlGenerator.App.Generator.Repositories
         /// </summary>
         /// <returns></returns>
         private IEnumerable<string> GenerateInterfaceMethods()
-
         {
             var entityClassName = table.Name.Parts[1];
             var pkFieldsNames = Common.ConcatPkFieldNames(table);
@@ -138,6 +137,15 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
             //Delete By Expression
             yield return (MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync])? $"Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);":string.Empty;
+          
+            //InsertAsyncTransaction
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.InsertAsyncTransaction]) ? $"Task<{returnType}> InsertAsyncTransaction({entityClassName} {Common.FirstCharacterToLower(entityClassName)}, SqlTransaction sqlTransaction);" : string.Empty;
+
+            //UpdateAsyncTransaction
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.UpdateAsyncTransaction]) ? $"Task UpdateAsyncTransaction({entityClassName} {Common.FirstCharacterToLower(entityClassName)}, SqlTransaction sqlTransaction);" : string.Empty;
+
+            //DeleteByPkFieldsNamesAsyncTransaction
+            yield return (MethodsToGenerate.Check[MethodNameToGenerate.DeleteByPkFieldsNamesAsyncTransaction]) ? $"Task DeleteBy{pkFieldsNames}AsyncTransaction({pkFieldsWithTypes}, SqlTransaction sqlTransaction);" : string.Empty;
 
         }
 
@@ -150,14 +158,20 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             var repositoryMethodsGenerator = new DapperRepositoryMethodsGenerator(table);
 
             yield return "#region Generated";
-            yield return repositoryMethodsGenerator.GenerateInsertMethod();
-            yield return repositoryMethodsGenerator.GenerateUpdateMethod();
-            yield return repositoryMethodsGenerator.GenerateDeleteMethod();
-            yield return repositoryMethodsGenerator.GenerateDeleteByExpressionMethod();
             yield return repositoryMethodsGenerator.GenerateGetAllMethod();
             yield return repositoryMethodsGenerator.GenerateGetByPKMethod();
             yield return repositoryMethodsGenerator.GenerateGetByExpressionMethod();
             yield return repositoryMethodsGenerator.GenerateGePaginatedMethod();
+            yield return repositoryMethodsGenerator.GenerateInsertMethod();
+            yield return repositoryMethodsGenerator.GenerateUpdateMethod();
+            yield return repositoryMethodsGenerator.GenerateDeleteMethod();
+            yield return repositoryMethodsGenerator.GenerateDeleteByExpressionMethod();
+
+            yield return repositoryMethodsGenerator.GenerateInsertTransactionMethod();
+            yield return repositoryMethodsGenerator.GenerateUpdateTransactionMethod();
+            yield return repositoryMethodsGenerator.GenerateDeleteTransactionMethod(); 
+
+
             yield return "#endregion Generated";
         }
 

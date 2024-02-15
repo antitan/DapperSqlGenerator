@@ -43,18 +43,16 @@ namespace DapperSqlGenerator.App.Services
                 if (!excludedTables.Contains(entityName))
                 {
                     string filePath = Path.Combine(dirToWrite, $"{entityName}Service.cs");
-                    if (!File.Exists(filePath))
+                    if (File.Exists(filePath)) File.Delete(filePath);
+                    using (var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
                     {
-                        using (var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
+                        using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
                         {
-                            using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
+                            string cs = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, dataRepositoryNamespace, projectName, refTables, table).Generate();
+                            if (cs != string.Empty)
                             {
-                                string cs = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, dataRepositoryNamespace, projectName, refTables, table).Generate();
-                                if (cs != string.Empty)
-                                {
-                                    string formatedCode = CodeFormatterHelper.ReformatCode(cs);
-                                    await writer.WriteLineAsync(formatedCode);
-                                }
+                                string formatedCode = CodeFormatterHelper.ReformatCode(cs);
+                                await writer.WriteLineAsync(formatedCode);
                             }
                         }
                     }

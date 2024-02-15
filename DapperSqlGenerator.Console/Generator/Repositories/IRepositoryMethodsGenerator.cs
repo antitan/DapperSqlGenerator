@@ -10,5 +10,10 @@
         string GenerateGePaginatedMethod();
         string GenerateGetByPKMethod();
         string GenerateGetByExpressionMethod();
+
+        //transaction methods
+        string GenerateInsertTransactionMethod();
+        string GenerateUpdateTransactionMethod();
+        string GenerateDeleteTransactionMethod(); 
     }
 }

@@ -18,101 +18,8 @@ namespace DapperSqlGenerator.App.Generator.Repositories
           this.table = table;
         }
 
-        #region DeleteByExpression
 
-        private string BuildDeleteByExpressionQuery()
-        {
-            return BuildDeleteQuery(" {criteria.ToMSSqlString()} ");
-        }
-
-        public string GenerateDeleteByExpressionMethod()
-        {
-            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync]) return string.Empty;
-            string query = BuildDeleteByExpressionQuery();
-            var entityClassName = table.Name.Parts[1];
-            string output = $@"
-                        /// <summary>
-                        /// Delete {entityClassName}
-                        /// </summary>
-                        public async Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
-                        {{
-                            using (var connection = new SqlConnection(connectionString))
-                            {{  
-                                await connection.ExecuteAsync($""{query}"");
-                            }}
-                        }}" + Environment.NewLine;
-
-            return output;
-        }
-
-        #endregion DeleteByExpression
-
-        #region Delete
-
-        private string BuildDeleteQuery(string where)
-        {
-            string query = $"DELETE FROM {table.Name} WHERE {where}";
-            return query;
-        }
-
-        private string BuildDeleteQuery()
-        {
-            string query = string.Empty;
-            var pkColumns = table.GetPrimaryKeyColumns();
-            var inputParamDeclarations = String.Join(Environment.NewLine + ", ", pkColumns.Select(col =>
-            {
-                var colName = col.Name.Parts[2];
-                var colDataType = col.GetColumnSqlDataType();
-                return $"@{colName} {colDataType}";
-            }));
-
-            var whereClause_conditions = String.Join(" AND ", pkColumns.Select(col =>
-            {
-                var colName = col.Name.Parts[2];
-                return $"[{colName}] = @{colName}";
-            })); 
-            return BuildDeleteQuery(whereClause_conditions);
-        }
-
-        public string GenerateDeleteMethod()
-        {
-            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByPkFieldsNamesAsync]) return string.Empty;
-            string query = BuildDeleteQuery();
-            var entityClassName = table.Name.Parts[1];
-            var pkColumns = table.GetPrimaryKeyColumns();
-            var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table);
-            var pkFieldsNames = Common.ConcatPkFieldNames(table);
-            string spParams = String.Join(Environment.NewLine + "            ",
-                    pkColumns.Select(col =>
-                    {
-                        var colName = col.Name.Parts[2];
-                        var colVariableName = Common.FirstCharacterToLower(colName.PascalCase());
-                        return $@"p.Add(""@{colName}"",{colVariableName});";
-                    }));
-
-            string output = $@"
-                        /// <summary>
-                        /// Delete {entityClassName}
-                        /// </summary>
-                        public async Task DeleteBy{pkFieldsNames}Async({pkFieldsWithTypes})
-                        {{
-                            using (var connection = new SqlConnection(connectionString))
-                            {{
-                                var p = new DynamicParameters();
-                                {spParams}
-
-                                await connection.ExecuteScalarAsync<int>(""{query}"", p);
-                            }}
-
-                        }}"+Environment.NewLine;
-
-            return output;
-        }
-
-        #endregion Delete
-
-
-       
+        #region Sql Build Helper Methods
 
         private string BuildSelectFromTableWhereAndOrderBy(string selection,string? whereClause = null, string? orderClause = null)
         { 
@@ -191,6 +98,8 @@ namespace DapperSqlGenerator.App.Generator.Repositories
         {
              return $"SELECT {selection} FROM {table.Name} \";  {Environment.NewLine}";
         }
+
+        #endregion Sql Build Helper Methods
 
 
         #region GetByExpression Method
@@ -383,7 +292,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
         #endregion Get by PK
 
-        #region Insert Method
+        #region Insert Methods
         private string BuildInsertQuery(bool isOnePkColumnIdentity)
         { 
             var allColumns = table.GetAllColumns();
@@ -410,13 +319,10 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                     $"INSERT INTO {table.Name} ({insertClause_columns})  VALUES ({insertClause_values})";
 
         }
-
         private string BuildInsertDapperOperator(bool isOnePkColumnIdentity,string returnType)
         {
             return (isOnePkColumnIdentity) ? $"QuerySingleAsync<{returnType}>" : "ExecuteAsync";
         }
-
-
         public string GenerateInsertMethod()
         {
             if (!MethodsToGenerate.Check[MethodNameToGenerate.InsertAsync]) return string.Empty;
@@ -465,9 +371,58 @@ namespace DapperSqlGenerator.App.Generator.Repositories
 
             return output;
         }
-        #endregion Insert Method
+        public string GenerateInsertTransactionMethod()
+        {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.InsertAsyncTransaction]) return string.Empty;
+            var pkColumns = table.GetPrimaryKeyColumns();
+            var allColumns = table.GetAllColumns();
+            //Exclude de PK identity field to put "Direction Output" in Dapper params
+            bool isOnePkColumnIdentity = pkColumns.Count() == 1 && pkColumns.ToList()[0].IsColumnIdentity();
+            var normalColumns = isOnePkColumnIdentity ? allColumns.Except(pkColumns) : allColumns;
 
-        #region  Update Method
+            string query = BuildInsertQuery(isOnePkColumnIdentity);
+
+            var entityClassName = table.Name.Parts[1];
+            var paramName = Common.FirstCharacterToLower(entityClassName);
+
+            string returnType = isOnePkColumnIdentity
+                ? MatchingDataTypeHelper.GetDotNetDataType(pkColumns.ToArray()[0].GetColumnSqlDataType())
+                : "bool"; // return bool if insert ok  => we cannot return the new Id generated by Identity
+
+            string spNormalParams = String.Join(Environment.NewLine + "            ",
+                   normalColumns.Select(col =>
+                   {
+                       var colName = col.Name.Parts[2];
+                       var entityProp = colName.PascalCase();
+                       return $@"p.Add(""@{colName}"", {paramName}.{entityProp});";
+                   }));
+            string dapperOperator = BuildInsertDapperOperator(isOnePkColumnIdentity, returnType);
+            string retunValue = isOnePkColumnIdentity ? "result" : "true";
+
+            string output = $@"
+            /// <summary>
+            /// Insert {entityClassName} inside a Transaction
+            /// </summary>
+            public async  Task<{returnType}> InsertAsyncTransaction({entityClassName} {paramName}, SqlTransaction sqlTransaction)
+            {{
+                using (var connection = new SqlConnection(connectionString))
+                {{
+                    var p = new DynamicParameters();
+                    {spNormalParams}
+
+                    var result = await connection.{dapperOperator}(""{query}"",p , sqlTransaction);
+
+                    return {retunValue};
+                }}
+                 
+            }}" + Environment.NewLine;
+
+            return output;
+        }
+
+        #endregion Insert Methods
+
+        #region  Update Methods
 
         private string BuildUpdateQuery()
         { 
@@ -519,24 +474,188 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                     }));
 
             string output = $@"
-        /// <summary>
-        /// Update {entityClassName}
-        /// </summary>
-        public async Task UpdateAsync({entityClassName} {paramName})
-        {{
-            using (var connection = new SqlConnection(connectionString))
+            /// <summary>
+            /// Update {entityClassName}
+            /// </summary>
+            public async Task UpdateAsync({entityClassName} {paramName})
             {{
-                 var p = new DynamicParameters();
-                 {spParams}
+                using (var connection = new SqlConnection(connectionString))
+                {{
+                     var p = new DynamicParameters();
+                     {spParams}
 
-                await connection.ExecuteScalarAsync<int>(""{query}"", p);
-            }}
+                    await connection.ExecuteScalarAsync<int>(""{query}"", p);
+                }}
 
-        }}"+Environment.NewLine;
+            }}"+Environment.NewLine;
 
             return output;
         }
-        #endregion Update Method
+        public string GenerateUpdateTransactionMethod()
+        {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.UpdateAsync]) return string.Empty;
+            string query = BuildUpdateQuery();
+            var entityClassName = table.Name.Parts[1];
+            var allColumns = table.GetAllColumns();
+            var paramName = Common.FirstCharacterToLower(entityClassName);
+
+
+            string spParams = String.Join(Environment.NewLine + "            ",
+                    allColumns.Select(col =>
+                    {
+                        var colName = col.Name.Parts[2];
+                        var entityProp = colName.PascalCase();
+                        return $@"p.Add(""@{colName}"", {paramName}.{entityProp});";
+                    }));
+
+            string output = $@"
+            /// <summary>
+            /// Update {entityClassName} inside a Transaction
+            /// </summary>
+            public async Task UpdateAsyncTransaction({entityClassName} {paramName}, SqlTransaction sqlTransaction)
+            {{
+                using (var connection = new SqlConnection(connectionString))
+                {{
+                     var p = new DynamicParameters();
+                     {spParams}
+
+                    await connection.ExecuteScalarAsync<int>(""{query}"", p, sqlTransaction);
+                }}
+
+            }}" + Environment.NewLine;
+
+            return output;
+        }
+        #endregion Update Methods
+
+        #region Delete Methods
+
+        private string BuildDeleteQuery(string where)
+        {
+            string query = $"DELETE FROM {table.Name} WHERE {where}";
+            return query;
+        }
+
+        private string BuildDeleteQuery()
+        {
+            string query = string.Empty;
+            var pkColumns = table.GetPrimaryKeyColumns();
+            var inputParamDeclarations = String.Join(Environment.NewLine + ", ", pkColumns.Select(col =>
+            {
+                var colName = col.Name.Parts[2];
+                var colDataType = col.GetColumnSqlDataType();
+                return $"@{colName} {colDataType}";
+            }));
+
+            var whereClause_conditions = String.Join(" AND ", pkColumns.Select(col =>
+            {
+                var colName = col.Name.Parts[2];
+                return $"[{colName}] = @{colName}";
+            }));
+            return BuildDeleteQuery(whereClause_conditions);
+        }
+
+        public string GenerateDeleteMethod()
+        {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByPkFieldsNamesAsync]) return string.Empty;
+            string query = BuildDeleteQuery();
+            var entityClassName = table.Name.Parts[1];
+            var pkColumns = table.GetPrimaryKeyColumns();
+            var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table);
+            var pkFieldsNames = Common.ConcatPkFieldNames(table);
+            string spParams = String.Join(Environment.NewLine + "            ",
+                    pkColumns.Select(col =>
+                    {
+                        var colName = col.Name.Parts[2];
+                        var colVariableName = Common.FirstCharacterToLower(colName.PascalCase());
+                        return $@"p.Add(""@{colName}"",{colVariableName});";
+                    }));
+
+            string output = $@"
+                        /// <summary>
+                        /// Delete {entityClassName} inside a Transaction
+                        /// </summary>
+                        public async Task DeleteBy{pkFieldsNames}Async({pkFieldsWithTypes})
+                        {{
+                            using (var connection = new SqlConnection(connectionString))
+                            {{
+                                var p = new DynamicParameters();
+                                {spParams}
+
+                                await connection.ExecuteScalarAsync<int>(""{query}"", p);
+                            }}
+
+                        }}" + Environment.NewLine;
+
+            return output;
+        }
+
+        public string GenerateDeleteTransactionMethod()
+        {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByPkFieldsNamesAsync]) return string.Empty;
+            string query = BuildDeleteQuery();
+            var entityClassName = table.Name.Parts[1];
+            var pkColumns = table.GetPrimaryKeyColumns();
+            var pkFieldsWithTypes = Common.ConcatPkFieldsWithTypes(table);
+            var pkFieldsNames = Common.ConcatPkFieldNames(table);
+            string spParams = String.Join(Environment.NewLine + "            ",
+                    pkColumns.Select(col =>
+                    {
+                        var colName = col.Name.Parts[2];
+                        var colVariableName = Common.FirstCharacterToLower(colName.PascalCase());
+                        return $@"p.Add(""@{colName}"",{colVariableName});";
+                    }));
+
+            string output = $@"
+                        /// <summary>
+                        /// Delete {entityClassName}
+                        /// </summary>
+                        public async Task DeleteBy{pkFieldsNames}AsyncTransaction({pkFieldsWithTypes}, SqlTransaction sqlTransaction)
+                        {{
+                            using (var connection = new SqlConnection(connectionString))
+                            {{
+                                var p = new DynamicParameters();
+                                {spParams}
+
+                                await connection.ExecuteScalarAsync<int>(""{query}"",p ,sqlTransaction);
+                            }}
+
+                        }}" + Environment.NewLine;
+
+            return output;
+        }
+
+
+        #endregion Delete Methods
+
+        #region DeleteByExpression
+
+        private string BuildDeleteByExpressionQuery()
+        {
+            return BuildDeleteQuery(" {criteria.ToMSSqlString()} ");
+        }
+
+        public string GenerateDeleteByExpressionMethod()
+        {
+            if (!MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync]) return string.Empty;
+            string query = BuildDeleteByExpressionQuery();
+            var entityClassName = table.Name.Parts[1];
+            string output = $@"
+                        /// <summary>
+                        /// Delete {entityClassName}
+                        /// </summary>
+                        public async Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria)
+                        {{
+                            using (var connection = new SqlConnection(connectionString))
+                            {{  
+                                await connection.ExecuteAsync($""{query}"");
+                            }}
+                        }}" + Environment.NewLine;
+
+            return output;
+        }
+
+        #endregion DeleteByExpression
 
     }
 }

@@ -39,14 +39,20 @@ namespace DapperSqlGenerator.App
             //Choice of methods to generate
             MethodsToGenerate.Check = new Dictionary<string,bool>()
             {
-                {MethodNameToGenerate.GetAllAsync, true},
-                {MethodNameToGenerate.GetPaginatedAsync, true},
-                {MethodNameToGenerate.GetByPkFieldsNamesAsync, true},
-                {MethodNameToGenerate.GetByExpressionAsync, true},
+                {MethodNameToGenerate.GetAllAsync, false},
+                {MethodNameToGenerate.GetPaginatedAsync, false},
+                {MethodNameToGenerate.GetByPkFieldsNamesAsync, false},
+                {MethodNameToGenerate.GetByExpressionAsync, false},
+                 {MethodNameToGenerate.DeleteByExpressionAsync, false},
+
                 {MethodNameToGenerate.InsertAsync, true},
                 {MethodNameToGenerate.UpdateAsync, true},
                 {MethodNameToGenerate.DeleteByPkFieldsNamesAsync, true},
-                {MethodNameToGenerate.DeleteByExpressionAsync, true}
+               
+                //method if you need to operate inside transaction
+                {MethodNameToGenerate.InsertAsyncTransaction, false},
+                {MethodNameToGenerate.UpdateAsyncTransaction, false},
+                {MethodNameToGenerate.DeleteByPkFieldsNamesAsyncTransaction, false}
             };
 
             //if includeOnlyTables is not empty , let excludedTables empty it will be computed afted

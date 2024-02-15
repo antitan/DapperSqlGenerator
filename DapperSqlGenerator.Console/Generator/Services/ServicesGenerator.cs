@@ -369,7 +369,6 @@ namespace DapperSqlGenerator.App.Generator.Services
 
             //DeleteAsync
             yield return (MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync])? $"Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);":string.Empty;
-
         }
     }
 }
