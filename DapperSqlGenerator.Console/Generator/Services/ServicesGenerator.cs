@@ -315,12 +315,17 @@ namespace DapperSqlGenerator.App.Generator.Services
             var repoClassName = entityClassName + "Service";
             var repoInterfaceName = "I" + repoClassName;
 
-            var methodDeclarations = String.Join(Environment.NewLine + "        ", GenerateInterfaceMethods());
+            string methodDeclarationGeneratedOutput = string.Empty;
+            var methodDeclarationGenerated = GenerateInterfaceMethods();
+            foreach( var methodDeclaration in methodDeclarationGenerated) 
+            {
+                methodDeclarationGeneratedOutput += methodDeclaration+ Environment.NewLine;
+            } 
 
             string output =
             $@" public interface {repoInterfaceName}
                 {{ 
-                    {methodDeclarations}
+                    {methodDeclarationGeneratedOutput}
                 }}";
 
             return output;
