@@ -118,9 +118,9 @@ namespace DapperSqlGenerator.App
             //generate model classes
             //await new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables).GenerateFilesAsync(model);
             //generate repository layer classes
-            //await new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, projectName,excludedTables).GenerateFilesAsync(model);
+            //await new RepositoryGeneratorService(splitInterfacesAndClassesFile,dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, projectName,excludedTables).GenerateFilesAsync(model);
             //generate services layer classes
-            //await new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataRepostioryNamespace, dataServiceDir, projectName, excludedTables, refTables).GenerateFilesAsync(model);
+            //await new ServicesGeneratorService(splitInterfacesAndClassesFile,dataServiceNamespace, dataModelNamespace, dataRepostioryNamespace, dataServiceDir, projectName, excludedTables, refTables).GenerateFilesAsync(model);
             //copy files utils
             //await new CopyUtilitiesFilesService(projectName, cacheServiceDir, configurationDir, helpersDir).GenerateFilesAsync(model);
             //generate custom files
