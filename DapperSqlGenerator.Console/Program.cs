@@ -11,7 +11,7 @@ namespace DapperSqlGenerator.App
         static async Task Main(string[] args)
         {
             string projectName = "MyProject";
-            string connectionString = "Data Source=localhost;Initial Catalog=SmartCv;Integrated Security=True;Persist Security Info=False;Trust Server Certificate=True;";
+            string connectionString = "Data Source=.\\SQLEXPRESS;Initial Catalog=SmartCv;Integrated Security=True;Persist Security Info=False;Trust Server Certificate=True;";
 
             string csProjPath = @"C:\proj_net\testGenerator\ConsoleApp1";
 
@@ -97,14 +97,16 @@ namespace DapperSqlGenerator.App
                 var  alltables = model.GetAllTables().Select(t => t.Name.Parts[1].PascalCase()).ToArray();
                 excludedTables = alltables.Except(includeOnlyTables).ToArray();
             }
+
+            bool splitInterfacesAndClassesFile = true;
              
             List<IGeneratorService> generatorServices = new List<IGeneratorService>();
             //generate model classes
             generatorServices.Add(new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables));
             //generate repository layer classes
-            generatorServices.Add(new RepositoryGeneratorService(dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, projectName, excludedTables));
+            generatorServices.Add(new RepositoryGeneratorService(splitInterfacesAndClassesFile,dataModelNamespace, dataRepostioryNamespace, dataRepositoryDir, projectName, excludedTables));
             //generate services layer classes
-            generatorServices.Add(new ServicesGeneratorService(dataServiceNamespace, dataModelNamespace, dataRepostioryNamespace, dataServiceDir, projectName, excludedTables, refTables));
+            generatorServices.Add(new ServicesGeneratorService(splitInterfacesAndClassesFile,dataServiceNamespace, dataModelNamespace, dataRepostioryNamespace, dataServiceDir, projectName, excludedTables, refTables));
             //copy files utils
             generatorServices.Add(new CopyUtilitiesFilesService(projectName, cacheServiceDir, configurationDir, helpersDir));
             //generate custom files

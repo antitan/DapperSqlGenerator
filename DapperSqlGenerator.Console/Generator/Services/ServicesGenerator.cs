@@ -5,7 +5,7 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace DapperSqlGenerator.App.Generator.Services
 {
-    public class ServicesGenerator : IGenerate
+    public class ServicesGenerator : IGenerate, IGenerateInterface, IGenerateClass
     {
         TSqlObject table;
         string dataModelNamespace;
@@ -27,7 +27,6 @@ namespace DapperSqlGenerator.App.Generator.Services
         public string Generate()
         {
             return  "using Microsoft.Extensions.Logging;" + Environment.NewLine +
-                    $"using Dapper;" + Environment.NewLine +
                     $"using System.Text.Json;" + Environment.NewLine +
                     $"using System.Linq.Expressions;" + Environment.NewLine +
                     $"using {projectName}.Common.Helpers;" + Environment.NewLine +
@@ -35,13 +34,36 @@ namespace DapperSqlGenerator.App.Generator.Services
                     $"using {projectName}.Common.Constants;" + Environment.NewLine +
                     $"using {projectName}.Common.Cache;" + Environment.NewLine +
                     $"using {dataModelNamespace};" + Environment.NewLine +
-                    $"using {dataRepositoryNamespace};" + Environment.NewLine +
+                    $"using {dataRepositoryNamespace};" + Environment.NewLine+ Environment.NewLine +
                     $@"namespace {serviceNamespace} {{
-
                         {GenerateInterface()}
-
                         {GenerateClass()}
+                    }}";
+        }
+        public string GenerateInterfacePart()
+        {
+            return 
+                   $"using System.Linq.Expressions;" + Environment.NewLine +
+                   $"using {projectName}.Common.Pagination;" + Environment.NewLine +
+                   $"using {dataModelNamespace};" + Environment.NewLine + Environment.NewLine +
+                   $@"namespace {serviceNamespace} {{
+                        {GenerateInterface()}
+                    }}";
+        }
 
+        public string GenerateClassPart()
+        {
+            return "using Microsoft.Extensions.Logging;" + Environment.NewLine +
+                    $"using System.Text.Json;" + Environment.NewLine +
+                    $"using System.Linq.Expressions;" + Environment.NewLine +
+                    $"using {projectName}.Common.Helpers;" + Environment.NewLine +
+                    $"using {projectName}.Common.Pagination;" + Environment.NewLine +
+                    $"using {projectName}.Common.Constants;" + Environment.NewLine +
+                    $"using {projectName}.Common.Cache;" + Environment.NewLine +
+                    $"using {dataModelNamespace};" + Environment.NewLine +
+                    $"using {dataRepositoryNamespace};" + Environment.NewLine + Environment.NewLine +
+                    $@"namespace {serviceNamespace} {{
+                        {GenerateClass()}
                     }}";
         }
 
@@ -383,5 +405,6 @@ namespace DapperSqlGenerator.App.Generator.Services
             //DeleteAsync
             yield return (MethodsToGenerate.Check[MethodNameToGenerate.DeleteByExpressionAsync])? $"Task DeleteByExpressionAsync(Expression<Func<{entityClassName}, bool>> criteria);":string.Empty;
         }
+
     }
 }

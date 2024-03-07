@@ -6,7 +6,7 @@ using Microsoft.SqlServer.Dac.Model;
 
 namespace DapperSqlGenerator.App.Generator.Repositories
 {
-    public class DapperRepositoryClassGenerator : IGenerate
+    public class DapperRepositoryClassGenerator : IGenerate , IGenerateInterface, IGenerateClass
     {
         TSqlObject table;
         string repositoryNamespace;
@@ -30,19 +30,42 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                     $"using {projectName}.Common.Pagination;" + Environment.NewLine +
                     $"using {projectName}.Common.Helpers;" + Environment.NewLine +
                     $"using Microsoft.Extensions.Options;" + Environment.NewLine +
-                    $"using Microsoft.Data.SqlClient;" + Environment.NewLine +
-            $@"namespace {repositoryNamespace} {{
-
+                    $"using Microsoft.Data.SqlClient;" + Environment.NewLine + Environment.NewLine +
+            $@"namespace {repositoryNamespace} 
+            {{
                         {GenerateInterface()}
-
                         {GenerateClass()}
-
-                    }}";
+            }}";
         }
 
-        
+        public string  GenerateInterfacePart()
+        {
+            return $"using System.Linq.Expressions;" + Environment.NewLine +
+                   $"using {dataModelNamespace};" + Environment.NewLine +
+                   $"using {projectName}.Common.Pagination;" + Environment.NewLine + Environment.NewLine +
+           $@"namespace {repositoryNamespace} 
+            {{
+                        {GenerateInterface()}
+            }}";
+        }
 
-      
+        public string GenerateClassPart()
+        {
+            return $"using Dapper;" + Environment.NewLine +
+                   $"using System.Linq.Expressions;" + Environment.NewLine +
+                   $"using {dataModelNamespace};" + Environment.NewLine +
+                   $"using {projectName}.Common.Configuration;" + Environment.NewLine +
+                   $"using {projectName}.Common.Pagination;" + Environment.NewLine +
+                   $"using {projectName}.Common.Helpers;" + Environment.NewLine +
+                   $"using Microsoft.Extensions.Options;" + Environment.NewLine +
+                   $"using Microsoft.Data.SqlClient;" + Environment.NewLine + Environment.NewLine +
+           $@"namespace {repositoryNamespace} 
+            {{
+                        {GenerateClass()}
+            }}";
+        }
+
+
 
         /// <summary>
         /// Get the declaration for the repo class
@@ -188,7 +211,6 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             yield return "#endregion Generated";
         }
 
-
-
+       
     }
 }

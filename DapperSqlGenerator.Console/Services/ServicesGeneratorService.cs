@@ -15,6 +15,7 @@ namespace DapperSqlGenerator.App.Services
         string dirToWrite;
         string[] excludedTables;
         string[] refTables;
+        bool splitInterfacesAndClassesFile;
 
         public List<string> Warnings
         {
@@ -24,8 +25,9 @@ namespace DapperSqlGenerator.App.Services
             }
         }
 
-        public ServicesGeneratorService(string serviceModelNamespace, string dataModelNamespace, string dataRepositoryNamespace, string dirToWrite, string projectName, string[] excludedTables, string[] refTables)
+        public ServicesGeneratorService(bool splitInterfacesAndClassesFile,string serviceModelNamespace, string dataModelNamespace, string dataRepositoryNamespace, string dirToWrite, string projectName, string[] excludedTables, string[] refTables)
         {
+            this.splitInterfacesAndClassesFile = splitInterfacesAndClassesFile;
             this.serviceModelNamespace = serviceModelNamespace;
             this.dirToWrite = dirToWrite;
             this.excludedTables = excludedTables;
@@ -42,17 +44,57 @@ namespace DapperSqlGenerator.App.Services
                 var entityName = table.Name.Parts[1].PascalCase();
                 if (!excludedTables.Contains(entityName))
                 {
-                    string filePath = Path.Combine(dirToWrite, $"{entityName}Service.cs");
-                    if (File.Exists(filePath)) File.Delete(filePath);
-                    using (var fileStream = File.Open(filePath, FileMode.Create, FileAccess.Write))
+                    var serviceGenerator = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, dataRepositoryNamespace, projectName, refTables, table);
+                    
+                    string serviceClassFilePath = Path.Combine(dirToWrite, $"{entityName}Service.cs");
+                    if (File.Exists(serviceClassFilePath)) 
+                        File.Delete(serviceClassFilePath);
+
+                    if (splitInterfacesAndClassesFile)
                     {
-                        using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
+                        //generate interface
+                        string interfaceClassFilePath = Path.Combine(dirToWrite, $"I{entityName}Service.cs");
+                        if (File.Exists(interfaceClassFilePath))
+                            File.Delete(interfaceClassFilePath);
+
+                        using (var fileStream = File.Open(interfaceClassFilePath, FileMode.Create, FileAccess.Write))
                         {
-                            string cs = new ServicesGenerator(serviceModelNamespace, dataModelNamespace, dataRepositoryNamespace, projectName, refTables, table).Generate();
-                            if (cs != string.Empty)
+                            using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
                             {
-                                string formatedCode = CodeFormatterHelper.ReformatCode(cs);
-                                await writer.WriteLineAsync(formatedCode);
+                                string cs = serviceGenerator.GenerateInterfacePart();
+                                if (cs != string.Empty)
+                                {
+                                    string formatedCode = CodeFormatterHelper.ReformatCode(cs);
+                                    await writer.WriteLineAsync(formatedCode);
+                                }
+                            }
+                        }
+                        //generate class
+                        using (var fileStream = File.Open(serviceClassFilePath, FileMode.Create, FileAccess.Write))
+                        {
+                            using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
+                            {
+                                string cs = serviceGenerator.GenerateClassPart();
+                                if (cs != string.Empty)
+                                {
+                                    string formatedCode = CodeFormatterHelper.ReformatCode(cs);
+                                    await writer.WriteLineAsync(formatedCode);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        using (var fileStream = File.Open(serviceClassFilePath, FileMode.Create, FileAccess.Write))
+                        {
+                            using (StreamWriter writer = new StreamWriter(fileStream, Encoding.UTF8))
+                            {
+                                string cs = serviceGenerator.Generate();
+                                if (cs != string.Empty)
+                                {
+                                    string formatedCode = CodeFormatterHelper.ReformatCode(cs);
+                                    await writer.WriteLineAsync(formatedCode);
+                                }
                             }
                         }
                     }
