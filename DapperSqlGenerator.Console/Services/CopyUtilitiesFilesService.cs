@@ -40,14 +40,6 @@ namespace DapperSqlGenerator.App.Services
             path = Path.Combine(cacheServiceDir, Path.GetFileNameWithoutExtension(file) + ".cs");
             await File.WriteAllTextAsync(path, contentFile);
 
-
-            //2-configuration connection string
-            file = "./FilesToCopy/Configuration/ConnectionStrings.txt";
-            contentFile = File.ReadAllText(file);
-            contentFile = contentFile.Replace("{projectNamespace}", projectName);
-            path = Path.Combine(configurationDir, Path.GetFileNameWithoutExtension(file) + ".cs");
-            await File.WriteAllTextAsync(path, contentFile);
-
             //helpers
             file = "./FilesToCopy/Helpers/JsonHelper.txt";
             contentFile = File.ReadAllText(file);

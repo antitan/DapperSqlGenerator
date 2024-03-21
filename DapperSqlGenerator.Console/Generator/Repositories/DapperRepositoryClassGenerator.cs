@@ -26,10 +26,9 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             return  $"using Dapper;" + Environment.NewLine +
                     $"using System.Linq.Expressions;" + Environment.NewLine +
                     $"using {dataModelNamespace};"+Environment.NewLine+
-                    $"using {projectName}.Common.Configuration;" + Environment.NewLine +
                     $"using {projectName}.Common.Pagination;" + Environment.NewLine +
                     $"using {projectName}.Common.Helpers;" + Environment.NewLine +
-                    $"using Microsoft.Extensions.Options;" + Environment.NewLine +
+                    $"using Microsoft.Extensions.Configuration;" + Environment.NewLine +
                     $"using Microsoft.Data.SqlClient;" + Environment.NewLine + Environment.NewLine +
             $@"namespace {repositoryNamespace} 
             {{
@@ -54,10 +53,9 @@ namespace DapperSqlGenerator.App.Generator.Repositories
             return $"using Dapper;" + Environment.NewLine +
                    $"using System.Linq.Expressions;" + Environment.NewLine +
                    $"using {dataModelNamespace};" + Environment.NewLine +
-                   $"using {projectName}.Common.Configuration;" + Environment.NewLine +
                    $"using {projectName}.Common.Pagination;" + Environment.NewLine +
                    $"using {projectName}.Common.Helpers;" + Environment.NewLine +
-                   $"using Microsoft.Extensions.Options;" + Environment.NewLine +
+                   $"using Microsoft.Extensions.Configuration;" + Environment.NewLine +
                    $"using Microsoft.Data.SqlClient;" + Environment.NewLine + Environment.NewLine +
            $@"namespace {repositoryNamespace} 
             {{
@@ -90,11 +88,11 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                 public class {repoClassName} : {repoInterfaceName}
                 {{
 
-                    private readonly string connectionString;
+                    private readonly string? connectionString;
 
-                    public {repoClassName}(IOptions<ConnectionStrings> connectionsStringsOptions)
+                    public {repoClassName}(IConfiguration configuration)
                     {{
-                        connectionString = connectionsStringsOptions.Value.DefaultConnection;
+                        connectionString = configuration.GetConnectionString(""DefaultConnection"");
                     }}
         
                     {methodDeclarationGeneratedOutput}

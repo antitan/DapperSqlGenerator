@@ -21,9 +21,6 @@
     <None Update="FilesToCopy\Cache\MemoryCacheManager.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="FilesToCopy\Configuration\ConnectionStrings.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="FilesToCopy\Constants\CacheDataConstants.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -48,7 +45,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="FilesToCopy\Configuration\" />
     <Folder Include="FilesToCopy\Constants\" />
     <Folder Include="FilesToCopy\ServiceExtensions\" />
   </ItemGroup>
