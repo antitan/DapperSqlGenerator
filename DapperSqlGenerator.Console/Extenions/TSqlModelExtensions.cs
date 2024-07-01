@@ -56,35 +56,44 @@ namespace DapperSqlGenerator.App.Extenions
         }
 
 
-     
+
 
         /// <summary>
-        /// Get the data type and its size (if applicable) from a table column 
+        /// Get the data type and its size (if applicable) from a table column.
         /// </summary>
-        /// <param name="column"></param>
-        /// <returns></returns>
-        public static string GetColumnSqlDataType(this TSqlObject column, bool withLength = true)
+        /// <param name="column">The column to analyze.</param>
+        /// <returns>The SQL data type as a string, with details if applicable.</returns>
+        public static string GetColumnSqlDataType(this TSqlObject column)
         {
             if (column == null) throw new ArgumentNullException(nameof(column));
-            SqlDataType sdt = column.GetReferenced(Column.DataType).First().GetProperty<SqlDataType>(DataType.SqlDataType);
-            if (withLength)
-            {
-                int length = column.GetProperty<int>(Column.Length);
-                bool isMax = column.GetProperty<bool>(Column.IsMax);
-                int precision = column.GetProperty<int>(Column.Precision);
-                int scale = column.GetProperty<int>(Column.Scale);
 
-                return precision != 0
-                    ? sdt.ToString().ToUpper() + $"({precision},{scale})"
-                    : length == 0 && !isMax
-                    ? sdt.ToString().ToUpper()
-                    : length == 0
-                    ? sdt.ToString().ToUpper() + "(MAX)"
-                    : sdt.ToString().ToUpper() + "(" + length + ")";
-            }
-            else
+            // Retrieve the SQL data type.
+            SqlDataType sdt = column.GetReferenced(Column.DataType).First().GetProperty<SqlDataType>(DataType.SqlDataType);
+
+            // Determine if additional details like length, precision, or scale are needed.
+            switch (sdt)
             {
-                return sdt.ToString().ToUpper();
+                case SqlDataType.Xml:
+                case SqlDataType.NText:
+                case SqlDataType.Text:
+                case SqlDataType.Char:
+                case SqlDataType.NChar:
+                case SqlDataType.VarChar:
+                case SqlDataType.NVarChar:
+                case SqlDataType.VarBinary:
+                    int length = column.GetProperty<int>(Column.Length);
+                    bool isMax = column.GetProperty<bool>(Column.IsMax);
+                    return $"{sdt.ToString().ToLower()}";
+
+                case SqlDataType.Decimal:
+                case SqlDataType.Numeric:
+                    int precision = column.GetProperty<int>(Column.Precision);
+                    int scale = column.GetProperty<int>(Column.Scale);
+                    return $"{sdt.ToString().ToLower()}";
+                //return $"{sdt.ToString().ToLower()}({precision},{scale})";
+
+                default:
+                    return sdt.ToString().ToLower();
             }
         }
 

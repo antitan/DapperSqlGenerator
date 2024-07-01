@@ -59,7 +59,7 @@ namespace DapperSqlGenerator.App.Generator
                       pkColumns.Select(col =>
                       {
                           var colName = col.Name.Parts[2];
-                          var colDataType = col.GetColumnSqlDataType(false);
+                          var colDataType = col.GetColumnSqlDataType();
 
                           //Search for custom member type or use the conversion from Sql Types
                           var memberType = MatchingDataTypeHelper.GetDotNetDataType(colDataType, false);

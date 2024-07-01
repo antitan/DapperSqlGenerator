@@ -23,7 +23,7 @@ namespace DapperSqlGenerator.App.Generator.Entities
             {
                 var colName = col.Name.Parts[2];
                 var memberName = colName.PascalCase();
-                var colDataType = col.GetColumnSqlDataType(false);
+                var colDataType = col.GetColumnSqlDataType();
                 var isNullable = col.IsColumnNullable();
                 bool isPk = pkColumns.SingleOrDefault(c => c.Name.Parts[2] == colName) != null ? true : false;
 
