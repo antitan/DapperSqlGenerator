@@ -8,7 +8,7 @@
         /// </summary>
         /// <param name="sqlDataTypeName"></param>
         /// <returns></returns>
-        public static string GetDotNetDataType_SystemDataSqlTypes(string sqlDataTypeName)
+        public static string? GetDotNetDataType_SystemDataSqlTypes(string sqlDataTypeName)
         {
             if (sqlDataTypeName == null) throw new ArgumentNullException(nameof(sqlDataTypeName));
             switch (sqlDataTypeName.ToLower())
@@ -115,7 +115,7 @@
         /// </summary>
         /// <param name="sqlDataTypeName"></param>
         /// <returns></returns>
-        public static string GetDotNetDataType(string sqlDataTypeName, bool nullable = false)
+        public static string? GetDotNetDataType(string sqlDataTypeName, bool nullable = false)
         {
             if (sqlDataTypeName == null) throw new ArgumentNullException(nameof(sqlDataTypeName));
             switch (sqlDataTypeName.ToLower())

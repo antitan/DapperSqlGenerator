@@ -90,7 +90,6 @@ namespace DapperSqlGenerator.App.Extenions
                     int precision = column.GetProperty<int>(Column.Precision);
                     int scale = column.GetProperty<int>(Column.Scale);
                     return $"{sdt.ToString().ToLower()}";
-                //return $"{sdt.ToString().ToLower()}({precision},{scale})";
 
                 default:
                     return sdt.ToString().ToLower();
