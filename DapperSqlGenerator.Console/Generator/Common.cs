@@ -7,6 +7,26 @@ namespace DapperSqlGenerator.App.Generator
     public static class Common
     {
         /// <summary>
+        /// Concat all the pk fields types (for method signature)
+        /// </summary>
+        /// <returns></returns>
+        public static string ConcatPkFieldTypes(TSqlObject table)
+        {
+            var pkColumns = table.GetPrimaryKeyColumns();
+            return String.Join(", ",
+                      pkColumns.Select(col =>
+                      {
+                          var colName = col.Name.Parts[2];
+                          var colDataType = col.GetColumnSqlDataType();//false
+
+                          //Search for custom member type or use the conversion from Sql Types
+                          var memberType = MatchingDataTypeHelper.GetDotNetDataType(colDataType, false);
+
+                          return $"{memberType}";
+                      })
+                    );
+        }
+        /// <summary>
         /// Helper to convert first char to lower
         /// </summary>
         /// <param name="str"></param>

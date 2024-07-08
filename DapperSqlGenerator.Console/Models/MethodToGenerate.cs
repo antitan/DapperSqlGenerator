@@ -14,6 +14,7 @@ namespace DapperSqlGenerator.App.Models
         public static readonly string GetByExpressionAsync = "GetByExpressionAsync";
         public static readonly string InsertAsync = "InsertAsync";
         public static readonly string UpdateAsync = "UpdateAsync";
+        public static readonly string DeleteAsync = "DeleteAsync";
         public static readonly string DeleteByPkFieldsNamesAsync = "DeleteBy{pkFieldsNames}Async";
         public static readonly string DeleteByExpressionAsync = "DeleteByExpressionAsync";
 

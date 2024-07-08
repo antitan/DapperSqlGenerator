@@ -144,6 +144,13 @@ namespace DapperSqlGenerator.App.Extenions
 
         }
 
+        public static string FirstCharToLowerCase(this string str)
+        {
+            string res = string.Empty;
+            if (!string.IsNullOrEmpty(str) && char.IsUpper(str[0]))
+                res = str.Length == 1 ? char.ToLower(str[0]).ToString() : char.ToLower(str[0]) + str[1..];
+            return res;
+        }
 
         /// <summary>
         /// Check if a column is nullable

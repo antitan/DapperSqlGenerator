@@ -3,6 +3,7 @@ using DapperSqlGenerator.App.Factory;
 using DapperSqlGenerator.App.Models;
 using DapperSqlGenerator.App.Services;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
+using System.CodeDom;
 
 namespace DapperSqlGenerator.App
 {
@@ -45,7 +46,24 @@ namespace DapperSqlGenerator.App
             if (!Directory.Exists(dataServiceDir)) 
                 Directory.CreateDirectory(dataServiceDir);
 
-            
+            string requestsDir = Path.Combine(csProjPath, $"Requests");
+            if (!Directory.Exists(requestsDir))
+                Directory.CreateDirectory(requestsDir);
+
+            string responseDir = Path.Combine(csProjPath, $"Responses");
+            if (!Directory.Exists(responseDir))
+                Directory.CreateDirectory(responseDir);
+
+            string mapperDir = Path.Combine(csProjPath, $"Mappers");
+            if (!Directory.Exists(mapperDir))
+                Directory.CreateDirectory(mapperDir);
+
+            string controllerDir = Path.Combine(csProjPath, $"Controllers");
+            if (!Directory.Exists(controllerDir))
+                Directory.CreateDirectory(controllerDir);
+
+
+
             string registerServiceExtensionDir = Path.Combine(csProjPath, "Extensions");  
             if (!Directory.Exists(registerServiceExtensionDir)) 
                 Directory.CreateDirectory(registerServiceExtensionDir);
@@ -99,7 +117,14 @@ namespace DapperSqlGenerator.App
             }
 
             bool splitInterfacesAndClassesFile = true;
-             
+
+            string webApiProject = "Dakota.Contacts.WebApi";
+            string modelNamespace = "Dakota.Contacts.Models";
+            string requestNamespace = $"{webApiProject}.Requests";
+            string responseNamespace = $"{webApiProject}.Response";
+            string mapperNamespace = $"{webApiProject}.Mappers";
+            string controllerNamespace = $"{webApiProject}.Controllers";
+
             List<IGeneratorService> generatorServices = new List<IGeneratorService>();
             //generate model classes
             generatorServices.Add(new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables));
@@ -114,6 +139,12 @@ namespace DapperSqlGenerator.App
             //generate stored procedure calls
             generatorServices.Add(new StoredProcedureGeneratorService(projectName, dataRepostioryNamespace, spDir));
 
+            generatorServices.Add(new ControllersGeneratorService(modelNamespace, controllerNamespace, mapperNamespace, requestNamespace, responseNamespace, dataServiceNamespace, controllerDir, excludedTables, refTables));
+            generatorServices.Add(new RequestGeneratorService(modelNamespace, requestNamespace, requestsDir, excludedTables));
+            generatorServices.Add(new ResponseGeneratorService(responseNamespace, responseDir, excludedTables));
+            generatorServices.Add(new MapperGeneratorService(modelNamespace, mapperNamespace, requestNamespace, responseNamespace, mapperDir, excludedTables));
+
+
             //Debug
             //generate model classes
             //await new DataModelGeneratorService(dataModelNamespace, dataModelDir, excludedTables).GenerateFilesAsync(model);
@@ -127,6 +158,14 @@ namespace DapperSqlGenerator.App
             //await new FileCustomerService(projectName, registerServiceExtensionDir, constantsDir, excludedTables, refTables).GenerateFilesAsync(model);
             //generate stored procedure calls
             //await new StoredProcedureGeneratorService(projectName, dataRepostioryNamespace, spDir).GenerateFilesAsync(model);
+
+            //Controller 
+            //await new ControllersGeneratorService(modelNamespace, controllerNamespace, mapperNamespace, requestNamespace, responseNamespace, dataServiceNamespace, controllerDir, excludedTables, refTables).GenerateFilesAsync(model);
+            //await new RequestGeneratorService(modelNamespace, requestNamespace, requestsDir, excludedTables).GenerateFilesAsync(model);
+            //await new ResponseGeneratorService(responseNamespace, responseDir, excludedTables).GenerateFilesAsync(model);
+            //await new MapperGeneratorService(modelNamespace, mapperNamespace, requestNamespace, responseNamespace, mapperDir, excludedTables).GenerateFilesAsync(model);
+
+
 
             List<Task> tasks = new List<Task>();
             generatorServices.ForEach(serv =>
