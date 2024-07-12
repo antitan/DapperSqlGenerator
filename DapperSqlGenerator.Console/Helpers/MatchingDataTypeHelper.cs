@@ -61,7 +61,7 @@
         /// </summary>
         /// <param name="sqlDataTypeName"></param>
         /// <returns></returns>
-        public static string GetDotNetDataType_SystemDataDbTypes(string sqlDataTypeName)
+        public static string? GetDotNetDataType_SystemDataDbTypes(string sqlDataTypeName)
         {
             if (sqlDataTypeName == null) throw new ArgumentNullException(nameof(sqlDataTypeName));
             switch (sqlDataTypeName.ToLower())

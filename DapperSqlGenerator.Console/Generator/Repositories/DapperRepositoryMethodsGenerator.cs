@@ -266,7 +266,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                   pkColumns.Select(col =>
                   {
                       var colName = col.Name.Parts[2];
-                      var colVariableName = Common.FirstCharacterToLower(colName.PascalCase());
+                      var colVariableName = Common.FirstCharacterToLower(colName.PascalCase()!);
                       return $@"p.Add(""@{colName}"",{colVariableName});";
                   }));
 
@@ -567,7 +567,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                     pkColumns.Select(col =>
                     {
                         var colName = col.Name.Parts[2];
-                        var colVariableName = Common.FirstCharacterToLower(colName.PascalCase());
+                        var colVariableName = Common.FirstCharacterToLower(colName.PascalCase()!);
                         return $@"p.Add(""@{colName}"",{colVariableName});";
                     }));
 
@@ -602,7 +602,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                     pkColumns.Select(col =>
                     {
                         var colName = col.Name.Parts[2];
-                        var colVariableName = Common.FirstCharacterToLower(colName.PascalCase());
+                        var colVariableName = Common.FirstCharacterToLower(colName.PascalCase()!);
                         return $@"p.Add(""@{colName}"",{colVariableName});";
                     }));
 
