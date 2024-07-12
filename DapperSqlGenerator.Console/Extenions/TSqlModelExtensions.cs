@@ -105,7 +105,7 @@ namespace DapperSqlGenerator.App.Extenions
         public static IEnumerable<TSqlObject> GetPrimaryKeyColumns(this TSqlObject table)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
-            TSqlObject pk = table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.UserDefined).FirstOrDefault();
+            TSqlObject? pk = table.GetReferencing(PrimaryKeyConstraint.Host, DacQueryScopes.UserDefined).FirstOrDefault();
             if (pk != null)
             {
                 var columns = pk.GetReferenced(PrimaryKeyConstraint.Columns);

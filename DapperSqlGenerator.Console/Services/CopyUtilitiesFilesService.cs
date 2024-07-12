@@ -27,7 +27,7 @@ namespace DapperSqlGenerator.App.Services
         {
             //copy files utilities
             //1- Cache
-            string contentFile = null;
+            string? contentFile = null;
             string file = "./FilesToCopy/Cache/ICacheManager.txt";
             contentFile = File.ReadAllText(file);
             contentFile = contentFile.Replace("{projectNamespace}", projectName);
