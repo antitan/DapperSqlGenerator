@@ -319,7 +319,7 @@ namespace DapperSqlGenerator.App.Generator.Repositories
                     $"INSERT INTO {table.Name} ({insertClause_columns})  VALUES ({insertClause_values})";
 
         }
-        private string BuildInsertDapperOperator(bool isOnePkColumnIdentity,string returnType)
+        private string BuildInsertDapperOperator(bool isOnePkColumnIdentity,string? returnType)
         {
             return (isOnePkColumnIdentity) ? $"QuerySingleAsync<{returnType}>" : "ExecuteAsync";
         }

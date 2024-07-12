@@ -20,7 +20,7 @@ namespace DapperSqlGenerator.App.Extenions
                 if (excludeSysSchema)
                     tables = tables.Where(currTable => currTable.Name.Parts[0].ToLower() != "sys");
             }
-            return tables;
+            return tables!;
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace DapperSqlGenerator.App.Extenions
                 if (excludeSysSchema)
                     roles = roles.Where(curRole => !curRole.Name.Parts[0].ToLower().Contains("db_") && curRole.Name.Parts[0].ToLower() != "public");
             }
-            return roles;
+            return roles!;
         }
 
 
@@ -181,7 +181,7 @@ namespace DapperSqlGenerator.App.Extenions
         /// </summary>
         /// <param name="the_string"></param>
         /// <returns></returns>
-        public static string PascalCase(this string the_string)
+        public static string? PascalCase(this string the_string)
         {
             // If there are 0 or 1 characters, just return the string.
             if (the_string == null) return the_string;
